@@ -3,7 +3,7 @@ services:
     build:
       context: ./php
       args:
-        PHP_VERSION: ${PHP_VERSION:-7.4}
+        PHP_VERSION: ${PHP_VERSION:-latest}
     ports:
       - "${HOST_HTTP_PORT:-8000}:80"
     env_file: .env
