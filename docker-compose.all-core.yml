@@ -1,0 +1,6 @@
+services:
+  php:
+    volumes:
+      - type: bind
+        source: ${WP_CORE_PATH:-./src}
+        target: /var/www/html
