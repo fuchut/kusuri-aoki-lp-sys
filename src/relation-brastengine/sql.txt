@@ -1,0 +1,12 @@
+◎送信済み→未送信へリセット
+UPDATE entry SET send_flg=0 WHERE send_flg=1;
+
+◎隔離解除（特定メール）
+UPDATE delivery_failures SET fail_count=0, last_code=NULL, last_body=NULL WHERE email='user@example.com';
+UPDATE entry SET quarantine_flg=0 WHERE quarantine_flg=1 AND email='user@example.com';
+
+◎実行
+docker compose exec php php /var/www/html/relation-brastengine/br_tx_job.php
+
+◎Cron
+* * * * * /usr/bin/php /home/ユーザー名/public_html/relation-brastengine/br_tx_job.php >> /home/ユーザー名/public_html/relation-brastengine/cron.log 2>&1

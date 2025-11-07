@@ -1,0 +1,7 @@
+[2025-11-07 15:36:34] batch rows=2
+[2025-11-07 15:36:34] ADMIN_NOTICE sent to fuchu@works-kanazawa.com
+[2025-11-07 15:36:34] SUCCESS id=9 email=fuchu@works-kanazawa.com
+[2025-11-07 15:36:35] ADMIN_NOTICE sent to fuchu@works-kanazawa.com
+[2025-11-07 15:36:35] SUCCESS id=12 email=fuchu@works-kanazawa.com
+[2025-11-07 15:36:35] no pending rows. sent=2 failed=0 exit.
+[2025-11-07 15:36:35] job finished. total sent=2 failed=0

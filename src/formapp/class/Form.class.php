@@ -138,13 +138,7 @@ class Form {
 		if (isset($data['error'][$key]) && $data['error'][$key]) {
 			$tpl_data = str_replace("<!-- error_".$key." -->", $data['error'][$key], $tpl_data);
 		}
-
-		$defaultslide = 0;
-		if(isset($data['default-slide'])) {
-			$defaultslide = $data['default-slide'];
-		}
-		$tpl_data = str_replace("<!-- defaultslide -->", "<script>const defaultSlide=".$defaultslide.";</script>", $tpl_data);
-		
+	
 		require_once($this->param['tpl_path'].'header.tpl');
 		echo $tpl_data;
 		require_once($this->param['tpl_path'].'footer.tpl');
@@ -158,130 +152,16 @@ class Form {
 
 		$data['data'] = $this->h($data['data']);
 
-		$keys = array('house_type', 'house_type_building', 'house_age', 'house_reform_all', 'house_reform_water', 'house_reform_out', 'house_reform_room', 'house_reform_etc', 'house_budget', 'house_construction', 'house_request');
-		foreach((array)$keys as $key) {
-			$tmp = "";
-			// if(!isset($data['data'][$key]) || !$data['data'][$key]) { $data['data'][$key] = 1; }
-			ob_start();
-			$i = 0;
-			foreach((array)$this->param[$key] as $k => $v) {
-				$sel = "";
-				$i++;
-				if($this->param[$key.'_type'] == "checkbox") {
-					if(isset($data['data'][$key]) && is_array($data['data'][$key])) {
-						if(in_array($k, $data['data'][$key])) { $sel = 'checked="checked"'; }
-					}
-				} else {
-					if(isset($data['data'][$key]) && $data['data'][$key] == $k) { $sel = 'checked="checked"'; }
-				}
-?>				
-<li>
-	<input
-		id="<?php echo $this->h($key.sprintf('%02d', $i)); ?>"
-		class="hide-check"
-		type="<?php echo $this->h($this->param[$key.'_type']); ?>"
-<?php if($this->param[$key.'_type'] == "checkbox") : ?>
-		name="<?php echo $this->h($key); ?>[]"
-<?php else : ?>
-		name="<?php echo $this->h($key); ?>"
-<?php endif; ?>
-		value="<?php echo $this->h($k); ?>" 
-		<?php echo $sel; ?>
-	/>
-	<?php 
-		$box_class = "";
-		$img = "";
-		if(isset($this->param[$key.'_img']) && is_array($this->param[$key.'_img'])) {
-			$box_class = "square";
-			$img = $this->param[$key.'_img'][$k];
-		} 
-	?>
-	<label class="<?php echo $box_class; ?>" for="<?php echo $this->h($key.sprintf('%02d', $i)); ?>">
-		<span class="item-base">
-			<i>
-				<svg
-					xmlns="http://www.w3.org/2000/svg"
-					width="28"
-					height="30"
-					viewBox="0 0 28 30"
-				>
-					<g
-						id="icon01"
-						data-name="icon01"
-						transform="translate(1 1)"
-					>
-						<g id="icon02" data-name="icon02">
-							<path
-								id="background"
-								data-name="background02-path"
-								d="M25.359,235.779c-8.01,1.5-10.218,3.839-11.577,12.542a.779.779,0,0,1-1.545,0c-1.371-8.7-3.581-11.041-11.6-12.524a.805.805,0,0,1,0-1.576c8.012-1.5,10.218-3.84,11.576-12.544a.779.779,0,0,1,1.545,0c1.372,8.7,3.584,11.043,11.6,12.526a.8.8,0,0,1,0,1.576"
-								transform="translate(0 -221)"
-								fill="#fff"
-							/>
-							<path
-								id="icon03"
-								data-name="icon03-path"
-								d="M13.009,250a1.761,1.761,0,0,1-1.76-1.521c-.7-4.413-1.579-6.859-3.051-8.444-1.45-1.562-3.692-2.5-7.738-3.253a1.8,1.8,0,0,1,0-3.543c4.044-.755,6.285-1.7,7.733-3.266,1.47-1.588,2.35-4.036,3.039-8.45a1.779,1.779,0,0,1,3.52,0c.7,4.413,1.58,6.86,3.053,8.445,1.451,1.562,3.692,2.5,7.738,3.253a1.8,1.8,0,0,1,0,3.543c-4.044.755-6.284,1.7-7.732,3.265-1.47,1.587-2.351,4.035-3.04,8.449A1.761,1.761,0,0,1,13.009,250Zm-11.2-14.99c3.9.813,6.214,1.9,7.851,3.664,1.605,1.728,2.6,4.157,3.345,8.216.736-4.061,1.731-6.49,3.334-8.222,1.634-1.764,3.945-2.856,7.844-3.676-3.9-.814-6.213-1.9-7.85-3.665-1.606-1.729-2.6-4.158-3.347-8.218-.735,4.061-1.73,6.491-3.333,8.223C8.024,233.1,5.713,234.19,1.813,235.01Z"
-								transform="translate(0 -221)"
-								fill="#323232"
-							/>
-						</g>
-					</g>
-				</svg>
-			</i>
-<?php if($img) : ?>
-	<span class="item-figure">
-		<img src="<?php echo $img; ?>" alt=""/>
-	</span>
-<?php endif; ?>
-			<span class="item-textarea"><?php echo $this->h($v); ?></span>
-		</span>
-	</label>
-</li>
-<?php
-			}
-			$tmp = ob_get_contents();
-			ob_end_clean();
-			$data['data'][$key] = $tmp;
+		$key = 'member_id';
+		if(isset($data['data'][$key]) && $data['data'][$key]) {
+			$value = $this->convertAlphaNum(str_replace(" ", "", $data['data'][$key]));
+			$data['data'][$key] = sprintf('%016d', $value);
 		}
 
-		$key = 'your-method';
-		$tmp = "";
-		if(!isset($data['data'][$key]) || !$data['data'][$key]) { $data['data'][$key] = 'メール'; }
-		$i = 0;
-		foreach((array)$this->param[$key] as $k => $v) {
-			$i++;
-			$sel = "";
-			if(isset($data['data'][$key]) && $data['data'][$key] == $k) { $sel = 'checked="checked"'; }
-			$tmp .= '<div class="form-main-radio_wrapper">
-			<input
-				id="'.$this->h($key.sprintf('%02d', $i)).'"
-				type="radio"
-				name="your-method"
-				class="js-required"
-				value="'.$this->h($k).'" 
-				'.$sel.'
-			/>
-			<label for="'.$this->h($key.sprintf('%02d', $i)).'">'.$this->h($v).'</label>
-		</div>';
+		$key = 'present';
+		if(!isset($data['data'][$key]) || !$data['data'][$key] || !isset($this->param[$key][$data['data'][$key]])) { 
+			$data['data'][$key] = ''; 
 		}
-		$data['data'][$key] = $tmp;
-
-		$key = 'your-check';
-		$tmp = "";
-
-			$sel = "";
-			if(isset($data['data'][$key]) && $data['data'][$key] == 1) { $sel = 'checked="checked"'; }
-			$tmp .= '<input
-							type="checkbox"
-							name="your-check"
-							id="check-confirm"
-							class="js-check-confirm" 
-							value="1" 
-							'.$sel.'
-						/>';
-		$data['data'][$key] = $tmp;
-
 
 		return $data;
 	}
@@ -293,26 +173,23 @@ class Form {
 
 		$data['data'] = $this->h($data['data']);
 
-		$keys = array('house_type', 'house_type_building', 'house_age', 'house_reform_all', 'house_reform_water', 'house_reform_out', 'house_reform_room', 'house_reform_etc', 'house_budget', 'house_construction');
-		foreach((array)$keys as $key) {
-			if($this->param[$key.'_type'] == "checkbox") {
-				if(isset($data['data'][$key]) && is_array($data['data'][$key])) {
-					$data['data'][$key] = implode("、", $data['data'][$key]);
-				}
-			}
+		$key = 'member_id';
+		if(isset($data['data'][$key]) && $data['data'][$key]) {
+			$value = $this->convertAlphaNum($data['data'][$key]);
+			$value = sprintf('%016d', $value);
+			$data['data'][$key] = trim(chunk_split($value, 4, ' '));
 		}
-		$keys = array('house_request');
-		foreach((array)$keys as $key) {
-			if($this->param[$key.'_type'] == "checkbox") {
-				if(isset($data['data'][$key]) && is_array($data['data'][$key])) {
-					$data['data'][$key] = implode("<br>", $data['data'][$key]);
-				}
-			}
+
+		$key = 'present';
+		if(isset($data['data'][$key]) && isset($this->param[$key][$data['data'][$key]])) {
+			$value = (int)$data['data'][$key];
+			$data['data'][$key] = $this->h($this->param[$key][$value]);
+		} else {
+			$data['data'][$key] = "";
 		}
 
 		return $data;
 	}
-
 
 	/**
 	 * メール用成形
@@ -321,21 +198,19 @@ class Form {
 
 		$data['data'] = $this->h($data['data']);
 
-		$keys = array('house_type', 'house_type_building', 'house_age', 'house_reform_all', 'house_reform_water', 'house_reform_out', 'house_reform_room', 'house_reform_etc', 'house_budget', 'house_construction');
-		foreach((array)$keys as $key) {
-			if($this->param[$key.'_type'] == "checkbox") {
-				if(isset($data['data'][$key]) && is_array($data['data'][$key])) {
-					$data['data'][$key] = implode("、", $data['data'][$key]);
-				}
-			}
-		}
-		$keys = array('house_request');
-		foreach((array)$keys as $key) {
-			if($this->param[$key.'_type'] == "checkbox") {
-				if(isset($data['data'][$key]) && is_array($data['data'][$key])) {
-					$data['data'][$key] = implode("\n", $data['data'][$key]);
-				}
-			}
+		// $key = 'member_id';
+		// if(isset($data['data'][$key]) && $data['data'][$key]) {
+		// 	$value = $this->convertAlphaNum($data['data'][$key]);
+		// 	$value = sprintf('%016d', $value);
+		// 	$data['data'][$key] = trim(chunk_split($value, 4, ' '));
+		// }
+
+		$key = 'present';
+		if(isset($data['data'][$key]) && isset($this->param[$key][$data['data'][$key]])) {
+			$value = (int)$data['data'][$key];
+			$data['data'][$key] = $this->h($this->param[$key][$value]);
+		} else {
+			$data['data'][$key] = "";
 		}
 
 		return $data;
@@ -423,39 +298,6 @@ class Form {
 			}
 		}
 
-		// メーカー宛
-		foreach((array)$data['data']['house_request'] as $req) {
-			if(!$req) {
-				continue;
-			}
-
-			if(!isset($this->param['house_request_mail'][$req]) || !$this->param['house_request_mail'][$req]) {
-				continue;
-			}
-
-			$to = $this->param['house_request_mail'][$req];
-			if ($to) {
-				$subject = $this->param['subject']['admin'];
-				$msg = file_get_contents($this->param['tpl_path'].$this->param['tpl']['groupmail']);
-	
-				foreach ($maildata['data'] as $k => $v) {
-					if (is_array($v)) {
-							continue;
-					}
-					$msg = str_replace("<!-- ".$k." -->", $this->d_h($this->mb_wordwrap($v, 250)), $msg);
-				}
-	
-				$msg = mb_convert_encoding($msg, $charset, "AUTO");
-	
-				$headers = "Mime-Version: 1.0\n";
-				$headers .= "Content-Transfer-Encoding: 7bit\n";
-				$headers .= "Content-Type: text/plain;charset={$charset}\n";
-				$headers .= "From: ".mb_encode_mimeheader($from["name"])."<".$from["mail"].">";
-	
-				mb_send_mail($to, $subject, $msg, $headers);
-			}
-		}
-
 	}
 
 	private function makeXlsx($data) {
@@ -472,16 +314,6 @@ class Form {
 			'your-name' => "お名前",
 			'your-kana' => "フリガナ",
 			'your-mail' => "メールアドレス",
-			'your-tel' => "電話番号",
-			'your-method' => "希望連絡方法",
-			'your-post' => "郵便番号",
-			'your-address' => "住所",
-			'house_type' => "タイプ",
-			'house_type_building' => "タイプ2",
-			'house_age' => "築年数",
-			'house_budget' => "予算",
-			'house_construction' => "着工時期",
-			'house_request' => "見積もり依頼先"
 		);
 
 		// 見出し
@@ -509,23 +341,6 @@ class Form {
 				$values[$key] = $data['data'][$key];
 			}
 		}
-		$reforms = array('all', 'water', 'out', 'room', 'etc');
-		foreach((array)$reforms as $reform) {
-			foreach((array)$this->param['house_reform_'.$reform] as $key => $item) {
-				if($data['data']['house_reform_'.$reform] && in_array($key, $data['data']['house_reform_'.$reform])) {
-					$values[$key] = "〇";
-				} else {
-					$values[$key] = "";
-				}
-			}
-		}
-
-		$i = 1;
-		foreach((array)$data['data']['house_request'] as $req) {
-			$values['house_request'] = $req;
-			$cells[$i] = $values;
-			$i++;
-		}
 
 		$sheet->fromArray($cells, null, 'A1');
 
@@ -547,7 +362,6 @@ class Form {
 		return $excelData;
 	}
 
-
 	/********************************************
 	 * Validate
 	 ********************************************/
@@ -564,152 +378,27 @@ class Form {
 		$this->error = $tmp['error'];
 		unset($this->error['consecutive']);
 
-		$key = 'house_type';
+		$key = 'member_id';
 		$this->error[$key] = "";
-		if(!isset($data[$key]) || !$data[$key] || !in_array($data[$key], $this->param[$key])) {
-			$this->error[$key] = '選択してください';
-		}
-
-		$key = 'house_type_building';
-		$this->error[$key] = "";
-		if($data['house_type'] == "戸建住宅") {
-			if(!isset($data[$key]) || !$data[$key] || !in_array($data[$key], $this->param[$key])) {
-				$this->error[$key] = '選択してください';
-			}
-		}
-
-		$key = 'house_age';
-		$this->error[$key] = "";
-		if(!isset($data[$key]) || !$data[$key] || !in_array($data[$key], $this->param[$key])) {
-			$this->error[$key] = '選択してください';
-		}
-
-		$keys = array(
-			'house_reform_all',
-			'house_reform_water',
-			'house_reform_out',
-			'house_reform_room',
-			'house_reform_etc',	
-		);
-
-		$flg = false;
-		foreach((array)$keys as $key) {
-			$this->error[$key] = "";
-			if(isset($data[$key]) && !empty($data[$key])) {
-				$items = array_keys($this->param[$key]);
-				foreach((array)$data[$key] as $i => $v) {
-					if(!in_array($v, $items)) {
-						unset($data[$key][$i]);
-					}
-				}
-				if(!empty($data[$key])) {
-					$flg = true;
-				}
-			}
-		}
-		if(!$flg) {
-			$this->error[$keys[0]] = '選択してください';
-		}
-
-		$key = 'house_budget';
-		$this->error[$key] = "";
-		if(!isset($data[$key]) || !$data[$key] || !in_array($data[$key], $this->param[$key])) {
-			$this->error[$key] = '選択してください';
-		}
-
-		$key = 'house_construction';
-		$this->error[$key] = "";
-		if(!isset($data[$key]) || !$data[$key] || !in_array($data[$key], $this->param[$key])) {
-			$this->error[$key] = '選択してください';
-		}
-
-		$key = 'house_request';
-		$this->error[$key] = "";
-		if(!isset($data[$key]) || !is_array($data[$key])) {
-			$this->error[$key] = '選択してください';
+		if(!isset($data[$key]) || !$data[$key]) {
+			$this->error[$key] = '入力してください';
 		} else {
-			$items = array_keys($this->param[$key]);
-			foreach((array)$data[$key] as $i => $v) {
-				if(!in_array($v, $items)) {
-					unset($data[$key][$i]);
-				}
-			}
-			if(empty($data[$key])) {
-				$this->error[$keys] = '選択してください';
-			} else if(count($data[$key]) > 3) {
-				$this->error[$keys] = '最大3件までです';
+			$data[$key] = sprintf('%016d', $this->convertAlphaNum(str_replace(" ", "", $data[$key])));
+		 	if(!$this->isInt($data[$key])) {
+				$this->error[$key] = '確認してください';
 			}
 		}
 
-		$key = "your-name";
+		$key = 'present';
 		$this->error[$key] = "";
-		if(!isset($data[$key]) || !trim(mb_convert_kana($data[$key], "s", 'UTF-8'))) {
-			$this->error[$key] = '入力してください';
-		} elseif(!$this->strLength($data[$key], 0, 120)) {
-			$this->error[$key] = '入力内容を確認してください';
-		}
+		if(!isset($data[$key]) || !$data[$key]) {
+			$this->error[$key] = '選択してください';
+		}		
 
-		$key = "your-kana";
-		$data[$key] = $this->convertKana($data[$key]);
+		$key = 'email';
 		$this->error[$key] = "";
-		if(!$data[$key]) {
+		if(!isset($data[$key]) || !$data[$key]) {
 			$this->error[$key] = '入力してください';
-		} elseif(!$this->isKana($data[$key])) {
-			$this->error[$key] = 'カタカナで入力してください';
-		} elseif(!$this->strLength($data[$key], 0, 120)) {
-			$this->error[$key] = '入力内容を確認してください';
-		}
-
-		// 郵便番号
-		$key = "your-post";
-		$data[$key] = $this->convertAlphaNum($data[$key]);
-		// $data[$key] = $this->removeHyphen($data[$key]);
-		$this->error[$key] = "";
-		if(!isset($data[$key]) || !trim(mb_convert_kana($data[$key], "s", 'UTF-8'))) {
-			$this->error[$key] = '入力してください';
-		} elseif(!$this->isZipNoH($data[$key])) {
-			$this->error[$key] = '入力内容を確認してください';
-		}
-
-		// 住所
-		$key = "your-address";
-		$data[$key] = $this->convertAlphaNum($data[$key]);
-		$this->error[$key] = "";
-		if(!isset($data[$key]) || !trim(mb_convert_kana($data[$key], "s", 'UTF-8'))) {
-			$this->error[$key] = '入力してください';
-		} elseif(!$this->strLength($data[$key], 0, 200)) {
-			$this->error[$key] = '入力内容を確認してください';
-		}
-
-		// 電話番号
-		$key = "your-tel";
-		$data[$key] = $this->convertAlphaNum($data[$key]);
-		$this->error[$key] = "";
-		if(!isset($data[$key]) || !trim(mb_convert_kana($data[$key], "s", 'UTF-8'))) {
-			$this->error[$key] = '入力してください';
-		} elseif(!$this->isTelNoH($data[$key])) {
-			$this->error[$key] = '入力内容を確認してください';
-		}
-
-		// メールアドレス
-		$key = "your-mail";
-		$data[$key] = $this->convertAlphaNum($data[$key]);
-		$this->error[$key] = "";
-		if(!isset($data[$key]) || !trim(mb_convert_kana($data[$key], "s", 'UTF-8'))) {
-			$this->error[$key] = '入力してください';
-		} elseif(!$this->isMail($data[$key])) {
-			$this->error[$key] = '入力内容を確認してください';
-		}
-
-		$key = "your-confirm";
-		$data[$key] = $this->convertAlphaNum($data[$key]);
-		$this->error[$key] = "";
-		if(!isset($data[$key]) || !trim(mb_convert_kana($data[$key], "s", 'UTF-8'))) {
-			$this->error[$key] = '入力してください';
-		} elseif(!$this->isMail($data[$key])) {
-			$this->error[$key] = '入力内容を確認してください';
-		} elseif($data[$key] != $data['your-mail']) {
-			$this->error[$key] = '入力内容を確認してください';
 		}
 
 		if($this->arrayFilterRecursive($this->error)) {

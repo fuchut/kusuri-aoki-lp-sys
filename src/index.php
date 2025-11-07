@@ -5,9 +5,11 @@
 
 require_once(dirname(__FILE__).'/formapp/setting.php');
 require_once(dirname(__FILE__).'/formapp/class/Form.class.php');
+require_once(dirname(__FILE__).'/formapp/class/DB.class.php');
 
 // Form Class
 $org = new Form();
+$db = new DB(DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASSWORD);
 
 // セッションスタート
 $org->sessionStart();
@@ -51,13 +53,6 @@ switch($mode) {
 			$org->setMode('return');
 			$data = $org->makeForm($data);
 
-			foreach((array)$data['error'] as $key => $val) {
-				if($val) { 
-					$data['default-slide'] = $param['slideno'][$key];
-					break;
-				}
-			}
-
 		} else {
 			$tpl = $param['tpl']['confirm'];
 
@@ -85,10 +80,11 @@ switch($mode) {
 			
 		} else {
 		
-			// 確認画面用成形
+			// メール用成形
 			$maildata = $org->makeMailBody($data);
-		
-			$org->sendMail($maildata, $data);
+
+			$db->insertEntry($maildata);
+			// $org->sendMail($maildata, $data);
 
 			$data['data'] = array();
 
@@ -100,7 +96,7 @@ switch($mode) {
 	
 			$org->setSendTimer();
 	
-			header('Location:../thanks/');
+			header('Location:thanks.html');
 
 			exit;
 		}
@@ -115,7 +111,6 @@ switch($mode) {
 
 		// フォーム用成形
 		$data = $org->makeForm($data);
-		$data['default-slide'] = 6;
 		
 		break;
 
