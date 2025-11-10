@@ -9,4 +9,5 @@ UPDATE entry SET quarantine_flg=0 WHERE quarantine_flg=1 AND email='user@example
 docker compose exec php php /var/www/html/relation-brastengine/br_tx_job.php
 
 ◎Cron
-* * * * * /usr/bin/php /home/ユーザー名/public_html/relation-brastengine/br_tx_job.php >> /home/ユーザー名/public_html/relation-brastengine/cron.log 2>&1
+* * * * * /usr/bin/php8.3 /home/xb343095/cp2025-kusuri-aoki.com/job/relation-brastengine/br_tx_job.php >> /home/xb343095/cp2025-kusuri-aoki.com/job/relation-brastengine/cron.log 2>&1
+10 0 * * 1 /usr/bin/php8.3 /home/xb343095/cp2025-kusuri-aoki.com/job/export/index.php >> /home/xb343095/cp2025-kusuri-aoki.com/job/export/job.log 2>&1

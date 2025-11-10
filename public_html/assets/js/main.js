@@ -474,7 +474,7 @@ function entryFormInput() {
   if ($aocaInput.length > 0) {
 
     $aocaInput.on('input', function() {
-      console.log("test");
+
       const $input = $(this);
       const value = $input.val();
       const cursorPos = $input[0].selectionStart;

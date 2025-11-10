@@ -5,7 +5,7 @@
  * Excel対応（SJIS-win / 先頭ゼロ保持）
  */
 
-require_once __DIR__ . '/../formapp/setting.php';
+require_once __DIR__ . '/../../public_html/formapp/setting.php';
 
 // ====== 共通設定 ======
 $tz = new DateTimeZone('Asia/Tokyo');

@@ -2,7 +2,12 @@ ARG PHP_VERSION=latest
 FROM php:${PHP_VERSION}-apache
 
 # Apache rewrite有効
-RUN a2enmod rewrite
+# RUN a2enmod rewrite
+# DocumentRoot を public_html に変更＆rewrite 有効化
+ENV APACHE_DOCUMENT_ROOT=/var/www/public_html
+RUN a2enmod rewrite \
+ && sed -ri "s!/var/www/html!${APACHE_DOCUMENT_ROOT}!g" /etc/apache2/sites-available/000-default.conf \
+ && sed -ri "s!/var/www/html!${APACHE_DOCUMENT_ROOT}!g" /etc/apache2/apache2.conf
 
 # 基本ツール
 RUN apt-get update && apt-get install -y --no-install-recommends \

@@ -2,29 +2,19 @@ services:
   php:
     build:
       context: ./php
+      dockerfile: Dockerfile
       args:
-        PHP_VERSION: ${PHP_VERSION:-latest}
+        PHP_VERSION: "8.3"   # ← 例：8.3 を使う      
     ports:
-      - "${HOST_HTTP_PORT:-8000}:80"
-    env_file: .env
-    volumes:
-      # src全体をマウント（WPも手動配置も共通）
-      - type: bind
-        source: ${WP_CORE_PATH:-./src}
-        target: /var/www/html
+      - "8080:80"
     environment:
-      WP_VERSION: ${WP_VERSION}
-      WP_LOCALE: ${WP_LOCALE}
-      WP_AUTO_UPDATE: ${WP_AUTO_UPDATE}
-      DB_HOST: ${DB_HOST}
-      DB_PORT: ${DB_PORT}
-      DB_NAME: ${DB_NAME}
-      DB_USER: ${DB_USER}
-      DB_PASSWORD: ${DB_PASSWORD}
-      TZ: Asia/Tokyo
+      TZ: Asia/Tokyo     # ← JST（日本時間）
+    volumes:
+      - ./public_html:/var/www/public_html
+      - ./job:/var/www/job
     depends_on:
-      db:
-        condition: service_healthy
+      - db
+    restart: unless-stopped
 
   db:
     image: mysql:8.0
@@ -33,13 +23,14 @@ services:
       - --character-set-server=utf8mb4
       - --collation-server=utf8mb4_general_ci
     environment:
+      TZ: Asia/Tokyo         # ← JST
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_DATABASE: ${DB_NAME}
       MYSQL_USER: ${DB_USER}
       MYSQL_PASSWORD: ${DB_PASSWORD}
-      TZ: Asia/Tokyo
+    # 競合する場合は外部ポートを3307に変更
     ports:
-      - "3306:3306"
+      - "3307:3306"
     volumes:
       - ./db/mysql:/var/lib/mysql
     healthcheck:
@@ -47,16 +38,18 @@ services:
       interval: 2s
       timeout: 2s
       retries: 10
+    restart: unless-stopped
 
   phpmyadmin:
     image: phpmyadmin:5
     ports:
       - "${PHPMYADMIN_PORT:-8989}:80"
     environment:
+      TZ: Asia/Tokyo        # ← JST
       PMA_HOST: db
       PMA_USER: root
       PMA_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      TZ: Asia/Tokyo
     depends_on:
       db:
         condition: service_healthy
+    restart: unless-stopped

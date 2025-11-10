@@ -1,8 +1,8 @@
 <?php declare(strict_types=1);
 
 /**
- * Blastengine トランザクション配信ジョブ
- * - CLI 専用。ただし index.php からは ALLOW_WEB_RUN = true の場合に限り実行可能
+ * Blastengine トランザクション配信ジョブ（クリーン版）
+ * - CLI 専用。ただし index.php からは ALLOW_WEB_RUN = true の場合に限り実行可
  * - セキュリティ硬化：log制御文字除去 / 作業dir 0775 / PDO emulate off
  */
 
@@ -12,8 +12,8 @@ if (PHP_SAPI !== 'cli' && !defined('ALLOW_WEB_RUN')) {
 }
 
 $BASE_DIR = __DIR__;
-require_once $BASE_DIR . '/../formapp/setting.php';
-require_once $BASE_DIR . '/../formapp/class/DB.class.php';
+require_once $BASE_DIR . '/../../public_html/formapp/setting.php';
+require_once $BASE_DIR . '/../../public_html/formapp/class/DB.class.php';
 
 /* ========================
    基本設定
@@ -57,7 +57,6 @@ $TPL_ADMIN_HTML_PATH = $BASE_DIR . '/tpl/admin_notify_html.tpl';
 if (!is_dir($WORKDIR)) {
   $old = umask(0002); mkdir($WORKDIR, 0775, true); umask($old);
 }
-
 if (!$BE_TOKEN) {
   fwrite(STDERR, "[ERROR] BE_BEARER_TOKEN が未設定です。\n");
   exit(1);
@@ -188,7 +187,7 @@ function be_tx_send(array $row): array {
   $unsubscribeUrl  = defined('BE_UNSUBSCRIBE_URL')  ? BE_UNSUBSCRIBE_URL  : 'https://example.com/unsubscribe';
   $unsubscribeFullUrl = $unsubscribeUrl . '?email=' . urlencode($to);
 
-  // ユーザー宛（mo.png回避のため text のみ。HTML送るなら html_part を有効化）
+  // ユーザー宛（必要なら html_part を有効化）
   $payloadUser = [
     'from'      => ['email' => $FROM_EMAIL, 'name' => $FROM_NAME],
     'to'        => $to,
@@ -198,7 +197,7 @@ function be_tx_send(array $row): array {
     // 'headers'   => ['List-Unsubscribe' => "<mailto:{$unsubscribeMail}>, <{$unsubscribeFullUrl}>"],
   ];
 
-  // 管理者通知（テンプレなしでも送る & member_idは4桁区切り）
+  // 管理者宛（テンプレなしでも送る & member_idは4桁区切り）
   $payloadAdmin = null;
   if (!empty($ADMIN_TO)) {
     if (is_string($TPL_ADMIN_TXT)) {
@@ -268,17 +267,12 @@ function be_tx_send(array $row): array {
   [$okUser, $codeUser, $resUser] = $sendFunc($payloadUser);
 
   // ユーザー宛成功時のみ、管理者通知
-  if ($okUser) {
-    if ($payloadAdmin) {
-      [$okAdmin, $codeAdmin, $resAdmin] = $sendFunc($payloadAdmin);
-      if ($okAdmin) { logf("ADMIN_NOTICE sent to {$ADMIN_TO}"); }
-      else {
-        $body = is_array($resAdmin) ? json_encode($resAdmin, JSON_UNESCAPED_UNICODE) : (string)$resAdmin;
-        logf("ADMIN_NOTICE FAIL to {$ADMIN_TO} code={$codeAdmin} body={$body}");
-      }
-    } else {
-      if (empty($ADMIN_TO)) logf("ADMIN_NOTICE skipped (BE_ADMIN_TO not set)");
-      else logf("ADMIN_NOTICE skipped (payloadAdmin not built)");
+  if ($okUser && $payloadAdmin) {
+    [$okAdmin, $codeAdmin, $resAdmin] = $sendFunc($payloadAdmin);
+    if ($okAdmin) { logf("ADMIN_NOTICE sent to {$ADMIN_TO}"); }
+    else {
+      $body = is_array($resAdmin) ? json_encode($resAdmin, JSON_UNESCAPED_UNICODE) : (string)$resAdmin;
+      logf("ADMIN_NOTICE FAIL to {$ADMIN_TO} code={$codeAdmin} body={$body}");
     }
   }
 
@@ -286,7 +280,7 @@ function be_tx_send(array $row): array {
 }
 
 /* ========================
-   実行本体（index.phpからも呼べる）
+   実行本体
    ======================== */
 function run_br_tx_job(): int {
   global $TABLE, $FAIL_TABLE;
@@ -412,8 +406,11 @@ function run_br_tx_job(): int {
 }
 
 /* ========================
-   CLIなら自動実行
+   自動実行（CLI または ALLOW_WEB_RUN=true）
    ======================== */
 if (PHP_SAPI === 'cli') {
-  exit(run_br_tx_job());
+  exit(run_br_tx_job());          // ← CLIは従来どおり exit
+}
+if (defined('ALLOW_WEB_RUN') && ALLOW_WEB_RUN) {
+  return run_br_tx_job();         // ← Webからの include 時は return（exitしない）
 }
