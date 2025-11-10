@@ -30,26 +30,14 @@ const isTouchDevice = 'ontouchend' in document;
  **********************************************/
 $(function () {
   loader();
-  gNav();
   telLink();
-  smoothScroll();
-  scrollTable();
+  // smoothScroll();
+  containerSmoothScroll();
   phantom(undefined, undefined, true);
   select();
   faqAccordion();
   bottleSelection();
   entryFormInput();
-
-  if ($('.js-sample')[0]) {
-    hamburger();
-    // lightcase();
-    modaal('.lightcase');
-    swiper();
-    accordion();
-    tab('.tab-single .tab', '.tab-single .content');
-    tab('.tab-multi .tab', '.tab-multi .content');
-    calendar();
-  }
 });
 
 /***********************************************
@@ -63,50 +51,6 @@ function loader() {
         $('body').removeClass('loader-fix');
         $('#loader').fadeOut(1000);
       });
-  }
-}
-
-/***********************************************
- * GNav
- **********************************************/
-function gNav() {
-  if ($('#floating_gnav')[0]) {
-    // Floating要素の高さを残す
-    let gnav_height;
-    let gnav_position;
-    let floating_nav_timer;
-
-    initFloatingNav();
-    floatingNavClass();
-
-    $(window).on('resize', function () {
-      if (floating_nav_timer !== false) {
-        clearTimeout(floating_nav_timer);
-      }
-      floating_nav_timer = setTimeout(function () {
-        floatingNavClass();
-      }, 200);
-    });
-
-    $(window).on('scroll', function () {
-      floatingNavClass();
-    });
-
-    function initFloatingNav() {
-      const html = $('#gnav').html();
-      $('#floating_gnav').html(html);
-    }
-
-    function floatingNavClass() {
-      gnav_height = $('#gnav').innerHeight();
-      gnav_position = $('#gnav').offset().top;
-
-      if ($(window).scrollTop() > gnav_position + gnav_height) {
-        $('#floating_gnav').addClass('flt-fixed');
-      } else {
-        $('#floating_gnav').removeClass('flt-fixed');
-      }
-    }
   }
 }
 
@@ -127,6 +71,7 @@ function telLink() {
 /***********************************************
  * Smooth scroll
  **********************************************/
+/*
 function smoothScroll() {
   $('[href^="#"]').on('click', function () {
     const speed = 500;
@@ -151,40 +96,32 @@ function smoothScroll() {
     }
   }
 }
+*/
 
-/***********************************************
- * Scroll table
- **********************************************/
-function scrollTable() {
-  if ($('.scroll-table')[0]) {
-    $('.scroll-table').after('<div class="swipe-img"></div>');
-  }
-}
+function containerSmoothScroll() {
 
-/***********************************************
- * hamburger
- **********************************************/
-function hamburger() {
-  let scrollPosition = 0;
-  const hamburger = $('#js-buttonHamburger');
+  const $container = $('.lp-layout__center');
 
-  hamburger.on('click', function () {
-    if ($(this).attr('aria-expanded') == 'false') {
-      scrollPosition = $(window).scrollTop();
-      $(this).attr('aria-expanded', true);
-      $('body').addClass('active');
-      $('#gnav').addClass('active');
-      $('.whitebar').removeClass('open-search');
-    } else {
-      $(this).attr('aria-expanded', false);
-      $('body').removeClass('active');
-      $('#gnav').removeClass('active').addClass('close');
-      $(window).scrollTop(scrollPosition);
-      scrollPosition = 0;
-      setTimeout(function () {
-        $('#gnav').removeClass('close');
-      }, 301);
-    }
+  $('[href^="#"]').on('click', function(e){
+    e.preventDefault();
+
+    const targetId = $(this).attr('href').replace('#', '');
+    const $target = $('#' + targetId);
+
+    if ($target.length === 0) return;
+
+    // コンテナ基準のスクロール位置を計算
+    const containerTop  = $container[0].getBoundingClientRect().top;
+    const targetTop     = $target[0].getBoundingClientRect().top;
+
+    const scrollPos = $container.scrollTop() + (targetTop - containerTop);
+
+    // スムーススクロール
+    $container.animate(
+      { scrollTop: scrollPos },
+      500,
+      'swing'
+    );
   });
 }
 
@@ -217,138 +154,14 @@ function phantom(searchClassName = '.phantom', addClassName = 'phantom-animation
 }
 
 /**********************************************
- * lightcase
+ * modal
  **********************************************/
-function lightcase() {
-  $('a[data-rel^=lightcase]').lightcase({
-    maxWidth: 1000,
-    maxHeight: 1000,
-    speedIn: 300,
-    speedOut: 300,
-    transition: 'fade',
-  });
-}
-
 function modaal(e) {
   $(e).modaal({
     type: 'image',
   });
 }
 
-/**********************************************
- * slick
- **********************************************/
-function slick() {
-  $('.slick-wrap').slick({
-    autoplay: false, //自動再生に
-    autoplaySpeed: 3000, //自動再生のスライド切り替えの時間
-    dots: true, //インジケーター表示
-    slidesToShow: 1, //表示するスライド数
-    slidesToScroll: 1, //一度にスクロールするスライドの数
-    centerMode: true, //センターに
-    arrows: true, //前後矢印の表示
-    centerPadding: '10%', //両端の見切れるスライドの幅指定
-    initialSlide: 1, //最初のスライド
-    responsive: [
-      {
-        breakpoint: 769, // 768以下
-        settings: {
-          slidesToShow: 1, //表示するスライド数
-          centerPadding: '16%', //両端の見切れるスライドの幅指定
-          initialSlide: 0, //最初のスライド
-        },
-      },
-      {
-        breakpoint: 641, // 640以下
-        settings: {
-          slidesToShow: 1, //表示するスライド数
-          centerPadding: '10%', //両端の見切れるスライドの幅指定
-          initialSlide: 0, //最初のスライド
-        },
-      },
-    ],
-  });
-}
-
-/**********************************************
- * swiper
- **********************************************/
-function swiper() {
-  const mySwiper = new Swiper('.swiper', {
-    loop: true, // 繰り返し
-    initialSlide: 1, // 最初のスライド
-    slidesPerView: 2, //表示するスライド数
-    spaceBetween: 20, // スライド同士の余白
-    centeredSlides: true, // センターに
-    autoplay: {
-      disableOnInteraction: true, // 自動再生に
-      delay: 3000, // 自動再生のスライド切り替えの時間
-    },
-    // レスポンシブ
-    breakpoints: {
-      768: {
-        // 768以下
-        slidesPerView: 2.2, //表示するスライド数
-        spaceBetween: 20, // スライド同士の余白
-      },
-      640: {
-        // 640以下
-        slidesPerView: 1.2, //表示するスライド数
-        spaceBetween: 10, // スライド同士の余白
-      },
-    },
-    // 前・次ボタン
-    navigation: {
-      nextEl: '.swiper-button-next',
-      prevEl: '.swiper-button-prev',
-    },
-    // ページネーション
-    pagination: {
-      el: '.swiper-pagination',
-      type: 'bullets',
-      clickable: true,
-    },
-  });
-}
-
-/**********************************************
- * accordion
- **********************************************/
-function accordion() {
-  const open = $('.open-wrap');
-  const speed = 700;
-  $(open).on('click', function () {
-    if ($(this).hasClass('on')) {
-      $(this).removeClass('on');
-      $('.answer', this).slideUp(speed);
-    } else {
-      $(this).addClass('on');
-      $('.answer', this).slideDown(speed);
-    }
-  });
-
-  $('.answer').on('click', function (event) {
-    event.stopPropagation();
-  });
-}
-
-/**********************************************
- * tab
- **********************************************/
-function tab(tab, content) {
-  // タブをクリックしたら発動
-  $(tab).on('click', function () {
-    // クリックされたタブの順番を変数に格納
-    const index = $(tab).index(this);
-    // クリック済みタブのデザインを設定したcssのクラスを一旦削除
-    $(tab).removeClass('active');
-    // クリックされたタブにクリック済みデザインを適用する
-    $(this).addClass('active');
-    // コンテンツを一旦非表示にし、クリックされた順番のコンテンツのみを表示
-    $(content).removeClass('show').eq(index).addClass('show');
-    return false;
-  });
-}
 
 // /**********************************************
 //  * select
@@ -366,26 +179,6 @@ function select() {
       else $(this).parent('.select-wrap').addClass('changed');
     });
   }
-}
-
-/**********************************************
- * calendar
- **********************************************/
-function calendar() {
-  // カレンダー表示
-  $('#datepicker').pickadate({
-    firstDay: 0, // 日曜始まり
-    format: 'yyyy/mm/dd',
-
-    // 除外する曜日
-    disable: [
-      4, // 水
-    ],
-
-    // 選択可能範囲
-    min: 0, // 1日前から
-    max: 60, // 60日後まで
-  });
 }
 
 /**********************************************
