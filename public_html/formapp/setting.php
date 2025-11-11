@@ -4,13 +4,13 @@ date_default_timezone_set('Asia/Tokyo');
 
 // 送信先
 $param['from'] = "info@xxx.com";
-$param['from_name'] = "リフォーム・アイミッツ";
+$param['from_name'] = "";
 $param['to'] = "fuchu@works-kanazawa.com"; // 複数はカンマ( , )でつなげる
 
 // メールタイトル
 $param['subject'] = array(
-        'admin' 	=> '【リフォーム・アイミッツ】HPからのお問い合わせ',
-        'user'		=> '【リフォーム・アイミッツ】お見積もりのご依頼ありがとうございます。',
+        'admin' 	=> '',
+        'user'		=> '',
 );
         
 $param['autores'] = true;
@@ -90,6 +90,11 @@ define('DB_USER', 'myuser');
 define('DB_PASSWORD', 'mypassword');
 define('DB_HOST', 'db');
 define('DB_PORT', '3306');
+
+// =====================================
+// 応募URL
+// =====================================
+define('APPLY_URL', 'https://cp2025-kusuri-aoki.com/apply/');
 
 // =====================================
 // Blastengine設定

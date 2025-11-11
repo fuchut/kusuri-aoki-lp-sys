@@ -28,16 +28,32 @@ class DB {
     $email    = strtolower(trim((string)$data['data']['email']));
     $present  = trim((string)$data['data']['present']);
 
+    // ユニークURL発行
+    $publicToken = random_bytes(16);
+
     $sql = "
-      INSERT INTO entry (member_id, present, email, send_flg, quarantine_flg, retry_at, updated_at, created_at)
-      VALUES (:member_id, :present, :email, 0, 0, NULL, NOW(), NOW())
+      INSERT INTO entry (
+        member_id,
+        present,
+        email,
+        public_token,
+        updated_at,
+        created_at
+      ) VALUES (
+        :member_id,
+        :present,
+        :email,
+        :public_token,
+        NOW(),
+        NOW()
+      )
       ON DUPLICATE KEY UPDATE
-        present         = VALUES(present),
-        email           = VALUES(email),
-        send_flg        = 0,
-        quarantine_flg  = 0,
-        retry_at        = NULL,
-        updated_at      = NOW()
+        present        = VALUES(present),
+        email          = VALUES(email),
+        send_flg       = 0,
+        quarantine_flg = 0,
+        retry_at       = NULL,
+        updated_at     = NOW()
     ";
 
     $stmt = $this->pdo->prepare($sql);
@@ -45,7 +61,36 @@ class DB {
       ':member_id' => $memberId,
       ':present'   => $present,
       ':email'     => $email,
+      ':public_token'  => $publicToken,
     ]);
   }
 
+  private function issuePublicTokenAndUrl(string $baseUrl, int $maxTries = 5): array
+  {
+      for ($i = 0; $i < $maxTries; $i++) {
+          $bin  = random_bytes(16);        // 16B = 128bit
+          $hex  = bin2hex($bin);           // URL用表示
+          $url  = rtrim($baseUrl, '/') . '/' . $hex;
+          // DB保存は VARBINARY(16) = $bin、表示や差し込みは $hex/$url を使う
+          return ['bin' => $bin, 'hex' => $hex, 'url' => $url];
+      }
+      throw new RuntimeException('public_token の発行に失敗しました');
+  }
+
+  /**
+   * トークンHEXから行を取得（/r/<hex> の受け側などで利用）
+   * @param string $hex 32桁の16進
+   * @return array|null
+   */
+  public function getEntryByPublicTokenHex(string $hex): ?array
+  {
+      if (!preg_match('/^[a-f0-9]{32}$/', $hex)) {
+          throw new InvalidArgumentException('invalid token hex');
+      }
+      $bin = hex2bin($hex);
+      $st = $this->pdo->prepare("SELECT id, member_id, present, email, public_token FROM entry WHERE public_token = :t LIMIT 1");
+      $st->execute([':t' => $bin]);
+      $row = $st->fetch();
+      return $row ?: null;
+  }
 }
