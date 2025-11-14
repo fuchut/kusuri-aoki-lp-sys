@@ -1,7 +1,4 @@
-		<!-- 右側カラム -->
-		<div class="lp-layout__right">
-		</div>
-	</div>
+
 
 </main>
 

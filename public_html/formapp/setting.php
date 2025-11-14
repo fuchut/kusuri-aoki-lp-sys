@@ -103,12 +103,13 @@ define('BE_BEARER_TOKEN', 'NTEwYWFmMjAzNTY0ZDQyZWJmNDczNWEzYjAyMDRkMzRmMGM1ZjQwN
 
 // Userメール設定
 define('BE_FROM_EMAIL', 'noreply@cp2025-kusuri-aoki.com');
-define('BE_FROM_NAME', 'クスリのアオキ');
-define('BE_FROM_SUBJECT', 'キャンペーンのご応募ありがとうございます');
+define('BE_FROM_NAME', 'クスリのアオキ「40周年大感謝キャンペーン」事務局');
+define('BE_FROM_SUBJECT', 'クスリのアオキ40周年大感謝キャンペーン 応募受付完了のお知らせ');
 
 // Adminメール設定
 define('BE_ADMIN_TO', 'fuchu@works-kanazawa.com');
-define('BE_ADMIN_SUBJECT', '応募がありました');
+// define('BE_ADMIN_TO', 'jimukyoku@cp2025-kusuri-aoki.com'); //本番
+define('BE_ADMIN_SUBJECT', 'キャンペーンに応募がありました');
 
 define('BE_TEST_TOKEN', 'pwworks');
 
