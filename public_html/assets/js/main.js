@@ -25,6 +25,12 @@ let scrollPos = 0;
 const ua = window.navigator.userAgent.toLowerCase();
 const isTouchDevice = 'ontouchend' in document;
 
+// Detect mobile device (smartphone) via user agent (more accurate than touch detection)
+function isMobileDevice() {
+  // mobile keywords: include typical smartphone indicators; tablet like iPad omitted
+  return /iphone|ipod|android.*mobile|windows phone|blackberry|opera mini|mobile/i.test(ua);
+}
+
 /***********************************************
  * 使用する
  **********************************************/
@@ -38,7 +44,40 @@ $(function () {
   faqAccordion();
   bottleSelection();
   entryFormInput();
+  mobileOnlyBunner();
 });
+
+/**
+ * Toggle visibility of elements with class `.js-mobile-only-bunner`
+ * Hide when device is touch-capable or viewport width <= 960px.
+ * Runs at load and on resize.
+ */
+function mobileOnlyBunner() {
+  const $items = $('.js-mobile-only-bunner');
+  if (!$items.length) return;
+  const isSmall = window.matchMedia('(max-width: 960px)').matches;
+  if (isMobileDevice() || isSmall) {
+    $items.hide();
+  } else {
+    $items.show();
+  }
+}
+
+// debounce helper
+function debounce(func, wait) {
+  let timeout;
+  return function () {
+    const context = this;
+    const args = arguments;
+    clearTimeout(timeout);
+    timeout = setTimeout(function () {
+      func.apply(context, args);
+    }, wait);
+  };
+}
+
+// Run on resize
+$(window).on('resize', debounce(mobileOnlyBunner, 120));
 
 /***********************************************
  * Loader
@@ -221,38 +260,57 @@ function bottleSelection() {
   }
 
   if ($('.js-bottle-item')[0]) {
-    const $bottleItem = $('.js-bottle-item');
+    const $bottleItems = $('.js-bottle-item');
     const $bottleOptions = $('.js-bottle-options');
     const $bottleRadios = $('.js-bottle-radio');
     
     // 水筒カード全体をクリックしたとき
-    $bottleItem.on('click', function(e) {
+    $bottleItems.on('click', function(e) {
       // ラジオボタンやラベルをクリックした場合は処理しない
       if ($(e.target).closest('.js-bottle-options').length > 0) {
         return;
       }
       
-      // オプションを表示
-      $bottleOptions.addClass('is-visible');
-      $bottleItem.addClass('is-selected');
+      // 他のボトルの選択状態を解除
+      $bottleItems.not(this).removeClass('is-selected').find('.js-bottle-options').removeClass('is-visible');
+
+      // クリック時に既にチェックされているその他の商品のラジオ（ボトル以外）を外す
+      const $otherGoodsRadios = $('input[name="present"]').not('.js-bottle-radio');
+      $otherGoodsRadios.prop('checked', false).trigger('change');
+
+      // オプションを表示（クリックした要素のみ）
+      $(this).find('.js-bottle-options').addClass('is-visible');
+      $(this).addClass('is-selected');
     });
     
     // 他の商品が選択されたら水筒の選択を解除
-    $('input[name="goods"]').on('change', function() {
+    $('input[name="present"]').on('change', function() {
       const isBottleSelected = $(this).hasClass('js-bottle-radio');
       
       if (!isBottleSelected) {
         // 水筒以外が選択されたら
         $bottleOptions.removeClass('is-visible');
-        $bottleItem.removeClass('is-selected');
+        $bottleItems.removeClass('is-selected');
         $bottleRadios.prop('checked', false);
       }
     });
     
+    // 初期状態で水筒の色が選択済みなら選択状態を反映
+    $bottleRadios.filter(':checked').each(function() {
+      const $item = $(this).closest('.js-bottle-item');
+      $item.addClass('is-selected');
+      $item.find('.js-bottle-options').addClass('is-visible');
+    });
+
     // 水筒の色が選択されたとき
     $bottleRadios.on('change', function() {
       if ($(this).is(':checked')) {
-        $bottleItem.addClass('is-selected');
+        // 他のボトルの選択を解除
+        $bottleItems.removeClass('is-selected').find('.js-bottle-options').removeClass('is-visible');
+        const $item = $(this).closest('.js-bottle-item');
+        // オプションを表示し、該当ボトルを選択状態にする
+        $item.find('.js-bottle-options').addClass('is-visible');
+        $item.addClass('is-selected');
       }
     });
   }
@@ -327,7 +385,7 @@ function entryFormInput() {
   }
   
   // 電話番号の入力制限（数字と-のみ）
-  const $phoneInput = $('input[name="phone"]');
+  const $phoneInput = $('input[name="tel"]');
   
   function restrictToNumbersAndHyphen($input) {
     $input.on('input', function() {

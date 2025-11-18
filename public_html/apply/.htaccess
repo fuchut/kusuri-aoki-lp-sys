@@ -1,0 +1,6 @@
+RewriteEngine On
+
+# apply/xxxxxx を apply/index.php に渡す
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.+)$ index.php [L,QSA]
