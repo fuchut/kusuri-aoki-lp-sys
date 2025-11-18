@@ -1,10 +1,11 @@
 <?php
 
-// require $_SERVER["DOCUMENT_ROOT"].'/../../../bin/vendor/autoload.php';
+require $_SERVER["DOCUMENT_ROOT"].'/../../bin/vendor/autoload.php';
 // require $_SERVER["DOCUMENT_ROOT"].'/../../bin/vendor/autoload.php';
 
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpSpreadsheet\IOFactory;
 
 class Form {
 
@@ -131,7 +132,7 @@ class Form {
 			$v = "";
 			$class = "";
 			if(isset($data['error'][$k]) && $data['error'][$k]) { 
-				$v = '<br><span class="error">'.$this->h($data['error'][$k]).'</span>';
+				$v = '<span class="error">'.$this->h($data['error'][$k]).'</span>';
 				$class = "error_bg";
 			}
 			$tpl_data = str_replace("<!-- error_".$k." -->", $v, $tpl_data);
@@ -166,25 +167,144 @@ class Form {
 		return $data;
 	}
 
-	public function getTokenFromRequest(): string
+	public function getTokenFromRequest(): string|false
 	{
-			$path = parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH) ?? '';
-			// 例: /apply/959425c6be9d11f0... → ['','apply','959425c6be9d11f0...']
-			$parts = array_values(array_filter(explode('/', $path), 'strlen'));
+    $path = parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH) ?? '';
+    $parts = array_values(array_filter(explode('/', $path), 'strlen'));
 
-			if (count($parts) < 2) {
-				return false;
-			}
+    if (count($parts) < 2) {
+        return false;
+    }
 
-			// 最後の要素を token とみなす
-			$token = $parts[count($parts) - 1];
+    // 最後の要素を token とみなす
+    $token = $parts[count($parts) - 1];
 
-			// 32桁の16進数かチェック
-			if (!preg_match('/^[0-9a-fA-F]{32}$/', $token)) {
-				return false;
-			}
+    // --- Excel 対策形式 ="token" を除去する ---
+    // ="abcdef..." → abcdef...
+    if (preg_match('/^="([0-9a-fA-F]{32})"$/', $token, $m)) {
+        $token = $m[1];
+    }
 
-			return $token;
+    // --- 引用符に囲まれている場合 ("token") を除外 ---
+    if (preg_match('/^"([0-9a-fA-F]{32})"$/', $token, $m)) {
+        $token = $m[1];
+    }
+
+    // --- 最終チェック：32桁の hex 以外は無効 ---
+    if (!preg_match('/^[0-9a-fA-F]{32}$/', $token)) {
+        return false;
+    }
+
+    return strtolower($token); // 小文字に統一（DB も小文字前提）
+	}
+
+	public function getMemberId(string $token)
+	{
+    // XLSX ファイルのパス
+    $xlsxFile = $this->param['xlsx']; // 例: "exports/entry_all.xlsx"
+
+    if (!file_exists($xlsxFile)) {
+        return null;
+    }
+
+		try {
+			$spreadsheet = IOFactory::load($xlsxFile);
+		} catch (\Throwable $e) {
+			var_dump('[XLSX load error]', $xlsxFile, $e->getMessage());
+			exit;
+		}
+
+    // 最初のシート取得（entry_all.xlsx は1シート構成）
+    $sheet = $spreadsheet->getActiveSheet();
+
+    // 行ループ開始
+    $rowIterator = $sheet->getRowIterator();
+
+    // 1行目（ヘッダ）をスキップ
+    if ($rowIterator->valid()) {
+        $rowIterator->next();
+    }
+
+    foreach ($rowIterator as $row) {
+        $cellIterator = $row->getCellIterator();
+        $cellIterator->setIterateOnlyExistingCells(false);
+
+        $rowValues = [];
+        foreach ($cellIterator as $cell) {
+            $rowValues[] = (string)$cell->getValue();
+        }
+
+        // カラム：0=member_id / 1=present / 2=email / 3=token / 4=url / 5=updated_at
+        if (!isset($rowValues[3])) {
+            continue;
+        }
+
+        $xlsxToken = trim($rowValues[3]);
+
+        // Token が一致したら結果返す
+        if ($xlsxToken === $token) {
+            // member_id の正規化（数字以外除去）
+            $memberIdRaw = $rowValues[0] ?? '';
+            $memberId    = preg_replace('/\D/', '', $memberIdRaw);
+
+            return [
+                'member_id' => $memberId,
+                'present'   => $rowValues[1] ?? '',
+                'email'     => $rowValues[2] ?? '',
+            ];
+        }
+    }
+
+    return null; // 見つからなかった場合
+	}
+
+
+
+	public function getMemberIdCSV(string $token)
+	{
+    // CSV ファイルのパス（クラス内で適宜変更）
+    $csvFile = $this->param['csv'];
+
+    if (!file_exists($csvFile)) {
+        return null;
+    }
+
+    // SJIS-win → UTF-8 に変換しながら読み込み
+    $fp = fopen($csvFile, 'r');
+    if (!$fp) {
+        return null;
+    }
+
+    // 1行目はヘッダー
+    $header = fgetcsv($fp);
+
+    while (($row = fgetcsv($fp)) !== false) {
+
+        // 各要素を UTF-8 に変換
+        $row = array_map(function ($v) {
+            return mb_convert_encoding($v, 'UTF-8', 'SJIS-win');
+        }, $row);
+
+        // CSV カラム順:
+        // 0:member_id, 1:present, 2:email, 3:token, 4:url, 5:updated_at
+        $csvToken = trim($row[3]);
+
+        if ($csvToken === $token) {
+
+            // member_id の正規化: ="0000012345678900" → 0000012345678900
+            $memberId = preg_replace('/[^0-9]/', '', $row[0]);
+
+            fclose($fp);
+            return array(
+							'member_id' => $memberId, 
+							'present' => $row[1],
+							'email' => $row[2],
+						);
+        }
+    }
+
+    fclose($fp);
+    return null; // 見つからない
 	}
 
 
@@ -248,12 +368,16 @@ class Form {
       $msg = str_replace("<!-- ".$k." -->", $this->d_h($this->mb_wordwrap($v, 250)), $msg);
 		}
 
+		$present = empty($_SESSION['memberData']['present']) ? "" : $_SESSION['memberData']['present'];
+		$msg = str_replace("<!-- present -->", $this->d_h($this->mb_wordwrap($present, 250)), $msg);
+
 		$msg = mb_convert_encoding($msg, $charset, "AUTO");
 
 		$from = array("name" => $this->param['from_name'], "mail" => $this->param['from']);
 
 		$headers = "Mime-Version: 1.0\n";
-		$headers .= "Content-Type: multipart/mixed; boundary=\"boundary\"\n";
+		$headers .= "Content-Transfer-Encoding: 7bit\n";
+		$headers .= "Content-Type: text/plain;charset={$charset}\n";
 		// $headers .= "From: ".mb_encode_mimeheader(mb_convert_encoding($from["name"], $charset, "AUTO"))." <".$from["mail"].">";
 		$headers .= "From: ".mb_encode_mimeheader($from["name"])."<".$from["mail"].">";
 
@@ -275,6 +399,8 @@ class Form {
 					$msg = str_replace("<!-- ".$k." -->", $this->d_h($this->mb_wordwrap($v, 250)), $msg);
 				}
 
+				$msg = str_replace("<!-- present -->", $this->d_h($this->mb_wordwrap($present, 250)), $msg);
+				
 				$msg = mb_convert_encoding($msg, $charset, "AUTO");
 
 				$headers = "Mime-Version: 1.0\n";
@@ -407,11 +533,11 @@ class Form {
 			$this->error[$key] = '入力してください';
 		}	
 
-		$token = $_SESSION['entry_token'];
-		$db_data = $this->db->findEntryByToken($token);
-		if(!$db_data || empty($db_data['member_id']) || empty($db_data['email']) || empty($data['member_id']) || empty($data['email'])) {
+		if(empty($_SESSION['memberData'])) {
+			$this->error['consecutive'] = '<p class="error consecutive_error">入力エラーがあります。</p>';
+		} elseif(empty($_SESSION['memberData']['member_id']) || empty($_SESSION['memberData']['email']) || empty($data['member_id']) || empty($data['email'])) {
 			$this->error['consecutive'] = '<p class="error consecutive_error">トークンエラー</p>';
-		} elseif(($db_data['member_id'] != $data['member_id']) || ($db_data['email'] != $data['email'])) {
+		} elseif(($_SESSION['memberData']['member_id'] != $data['member_id']) || ($_SESSION['memberData']['email'] != $data['email'])) {
 			$this->error['consecutive'] = '<p class="error consecutive_error">トークンエラー</p>';
 		}
 

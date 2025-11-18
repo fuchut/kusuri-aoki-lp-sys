@@ -40,10 +40,6 @@
 										<div class="lp-confirm-section__table-label">住所</div>
 										<div class="lp-confirm-section__table-value"><!-- address --></div>
 									</div>
-									<div class="lp-confirm-section__table-row">
-										<div class="lp-confirm-section__table-label">景品を受け取る</div>
-										<div class="lp-confirm-section__table-value">景品を受け取る</div>
-									</div>
 								</div>
 								
 								<div class="lp-confirm-section__attention">

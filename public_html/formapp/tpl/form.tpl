@@ -101,7 +101,7 @@
 					<section class="lp-section lp-announcement-section">
 						<div class="lp-section__inner">
 							<div class="lp-announcement-section__title">
-								<img src="/assets/img/announcement-title01.png" alt="当選発表" width="157" height="40">
+								<img src="/assets/img/announcement-title01.png" alt="当選発表" width="371" height="40">
 							</div>
 							<div class="lp-announcement-section__content">
 								<div class="lp-announcement-section__content-item">
@@ -127,7 +127,7 @@
 						</div>
 					</section>
 
-					<form action="" method="post" id="application-form">
+					<form action="#application-form" method="post" id="application-form">
 						<div class="lp-application-form__inner bg-red">
 							<div class="lp-application-form__title">
 								<img src="/assets/img/form-title.png" alt="応募フォーム" width="329" height="46">
@@ -137,6 +137,7 @@
 									<div class="lp-application-form__content-item-title">
 										<img src="/assets/img/form-number.png" alt="会員番号 必須項目" width="125" height="22">
 									</div>
+									<!-- error_member_id -->
 									<div class="lp-application-form__content-item-input">
 										<input type="text" name="member_id" value="<!-- member_id -->" placeholder="0000 0000 0000 0000">
 									</div>
@@ -151,11 +152,13 @@
 									<div class="lp-application-form__content-item-banner">
 										<img src="/assets/img/buneer-main.png" alt="Aocaカードをお持ちでない方は、公式アプリから作成できます！500ポイントで500円券進呈！500円券×3枚＝2000円割引アプリ限定クーポン アプリのダウンロード お使いのデバイスに合わせてApp Storeもしくは Google playよりダウンロードしてください。" width="302" height=340">
 										<img src="/assets/img/bunner-qr.png" alt="Download on the App Store QRコード GET IT ON Google Play QRコード" width="278" height="170" class="js-mobile-only-bunner">
+										<a class="link-app-store" href="https://apps.apple.com/jp/app/%E3%82%AF%E3%82%B9%E3%83%AA%E3%81%AE%E3%82%A2%E3%82%AA%E3%82%AD%E5%85%AC%E5%BC%8F%E3%82%A2%E3%83%97%E3%83%AA/id1464657112?l=en-US" target="_blank"></a>
+										<a class="link-google-play" href="https://play.google.com/store/apps/details?id=jp.co.kusuriaoki.android.public" target="_blank"></a>
 									</div>									
 								</div>
 								<div class="lp-application-form__content-item" data-selected-goods="<!-- present -->">
 									<div class="lp-application-form__content-item-title">
-										<img src="/assets/img/form-merchandise.png" alt="応募商品 必須項目" width="126" height="24">
+										<img src="/assets/img/form-merchandise.png" alt="応募商品 必須項目" width="265" height="28">
 									</div>
 
 									<!-- error_present -->
@@ -285,9 +288,9 @@
 									<div class="lp-application-form__content-item-title">
 										<img src="/assets/img/form-mail.png" alt="メールアドレス 必須項目" width="166" height="24">
 									</div>
+									<!-- error_email -->
 									<div class="lp-application-form__content-item-input">
 										<input type="text" name="email" value="<!-- email -->" placeholder="例）info@example.com">
-										<!-- error_email -->
 									</div>
 									<div class="lp-application-form__content-item-attention">
 										<p>ドメイン拒否を設定されている場合、確認メールが届きませんので、あらかじめ「cp2025-kusuri-aoki.com」のドメインを受信できるように設定をお願いします。</p>

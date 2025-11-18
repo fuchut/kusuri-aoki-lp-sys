@@ -13,6 +13,11 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/../../public_html/formapp/setting.php'; // DB定数 / APPLY_URL を定義しておく
+require_once __DIR__ . '/../../../bin/vendor/autoload.php';             // ← PhpSpreadsheet 用 autoload
+
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpSpreadsheet\Cell\DataType;
 
 // ====== 共通設定 ======
 $tz        = new DateTimeZone('Asia/Tokyo');
@@ -61,6 +66,11 @@ $allCsv = $exportDir . '/entry_all.csv';
 exportCsvToFile($pdo, $allCsv, null, null);
 echo "[OK] All data exported: {$allCsv}\n";
 
+// ====== 全データXLSX（Excel用） ======
+$allXlsx = $exportDir . '/entry_all.xlsx';
+exportXlsxToFile($pdo, $allXlsx, null, null);
+echo "[OK] All data XLSX exported: {$allXlsx}\n";
+
 // ====== 週次CSV（最新→過去、月曜始まり〜日曜終わりの週単位） ======
 $current = (clone $maxDate)->modify('sunday this week')->setTime(23, 59, 59);
 while ($current >= $minDate) {
@@ -75,6 +85,15 @@ while ($current >= $minDate) {
     );
     exportCsvToFile($pdo, $filename, $start, $end);
     echo "[OK] Week exported: {$filename}\n";
+
+    // 週次 XLSX
+    $xlsxFilename = sprintf('%s/entry_%s_%s.xlsx',
+        $exportDir,
+        $start->format('Ymd'),
+        $end->format('Ymd')
+    );
+    exportXlsxToFile($pdo, $xlsxFilename, $start, $end);
+    echo "[OK] Week XLSX exported: {$xlsxFilename}\n";
 
     // 1週間戻す
     $current->modify('-7 days');
@@ -144,21 +163,30 @@ function exportCsvToFile(PDO $pdo, string $filepath, ?DateTime $start, ?DateTime
     };
 
     // ヘッダ
-    $writeCsvLine(['member_id', 'present', 'email', 'url', 'updated_at']);
+    $writeCsvLine(['member_id', 'present', 'email', 'token', 'url', 'updated_at']);
 
     // 本文
     while ($r = $stmt->fetch(PDO::FETCH_ASSOC)) {
         // Excelで先頭ゼロを保持
         $memberIdExcel = '="' . (string)$r['member_id'] . '"';
 
-        // URL を生成（public_token が無い場合は空欄）
+        // URL / token
         $tokenHex = $r['public_token_hex'] ?? null;
-        $url = ($base !== '' && $tokenHex) ? $base . '/' . strtolower($tokenHex) : '';
+        if ($tokenHex !== null && $tokenHex !== '') {
+            $tokenHexLower = strtolower($tokenHex);
+            $tokenHexLowerExcel = '="' . $tokenHexLower . '"';
+            $url = ($base !== '' ? $base . '/' . $tokenHexLower : '');
+        } else {
+            $tokenHexLower      = '';
+            $tokenHexLowerExcel = '';   // ← ここを空セルにする
+            $url                = '';
+        }
 
         $writeCsvLine([
-            $memberIdExcel,
+            $r['member_id'],
             (string)$r['present'],
             (string)$r['email'],
+            $tokenHexLower,
             $url,
             (string)$r['updated_at'],
         ]);
@@ -170,4 +198,88 @@ function exportCsvToFile(PDO $pdo, string $filepath, ?DateTime $start, ?DateTime
         @unlink($tmp);
         throw new RuntimeException("failed to place CSV (rename): {$filepath}");
     }
+}
+
+/**
+ * 期間指定で XLSX を出力
+ * - CSV と同じ条件で SELECT
+ * - member_id / token / url / updated_at は文字列として保存
+ *   → 16桁でも先頭ゼロ・桁数・日付変換などを完全に防ぐ
+ */
+function exportXlsxToFile(PDO $pdo, string $filepath, ?DateTime $start, ?DateTime $end): void
+{
+    $sql = "
+        SELECT
+            member_id,
+            present,
+            email,
+            CASE WHEN public_token IS NULL THEN NULL ELSE HEX(public_token) END AS public_token_hex,
+            updated_at
+        FROM entry
+    ";
+    $params = [];
+    if ($start && $end) {
+        $sql .= " WHERE updated_at BETWEEN :start AND :end";
+        $params[':start'] = $start->format('Y-m-d H:i:s');
+        $params[':end']   = $end->format('Y-m-d H:i:s');
+    }
+    $sql .= " ORDER BY updated_at ASC";
+
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($params);
+
+    // ベースURL（未定義なら空文字でURL生成をスキップ）
+    $base = defined('APPLY_URL') ? rtrim((string)APPLY_URL, '/') : '';
+
+    $spreadsheet = new Spreadsheet();
+    $sheet = $spreadsheet->getActiveSheet();
+    $sheet->setTitle('entry');
+
+    // ヘッダ
+    $sheet->fromArray(
+        ['member_id', 'present', 'email', 'token', 'url', 'updated_at'],
+        null,
+        'A1'
+    );
+
+    $rowNum = 2;
+
+    while ($r = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        $memberId = (string)$r['member_id'];
+        $present  = (string)$r['present'];
+        $email    = (string)$r['email'];
+
+        $tokenHex = $r['public_token_hex'] ?? null;
+        if ($tokenHex !== null && $tokenHex !== '') {
+            $tokenHexLower = strtolower($tokenHex);
+            $url           = ($base !== '' ? $base . '/' . $tokenHexLower : '');
+        } else {
+            $tokenHexLower = '';
+            $url           = '';
+        }
+
+        // すべて文字列で保存（Excelの勝手な型変換を防ぐ）
+        $sheet->setCellValueExplicit("A{$rowNum}", $memberId, DataType::TYPE_STRING);
+        $sheet->setCellValueExplicit("B{$rowNum}", $present,  DataType::TYPE_STRING);
+        $sheet->setCellValueExplicit("C{$rowNum}", $email,    DataType::TYPE_STRING);
+        $sheet->setCellValueExplicit("D{$rowNum}", $tokenHexLower, DataType::TYPE_STRING);
+        $sheet->setCellValueExplicit("E{$rowNum}", $url,      DataType::TYPE_STRING);
+        $sheet->setCellValueExplicit("F{$rowNum}", (string)$r['updated_at'], DataType::TYPE_STRING);
+
+        $rowNum++;
+    }
+
+    // ディレクトリなければ作る
+    $dir = dirname($filepath);
+    if (!is_dir($dir)) {
+        $old = umask(0002);
+        if (!@mkdir($dir, 0775, true) && !is_dir($dir)) {
+            throw new RuntimeException("cannot create dir: {$dir}");
+        }
+        umask($old);
+    }
+
+    $writer = new Xlsx($spreadsheet);
+    $writer->save($filepath);
+    @chmod($filepath, 0664);
 }

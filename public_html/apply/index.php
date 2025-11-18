@@ -7,12 +7,9 @@ header("Pragma: no-cache");
 
 require_once(dirname(__FILE__).'/formapp/setting.php');
 require_once(dirname(__FILE__).'/formapp/class/Form.class.php');
-require_once(dirname(__FILE__).'/formapp/class/DB.class.php');
-$db = new DB(DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASSWORD);
 
 // Form Class
 $org = new Form();
-$org->setDB($db);
 
 // セッションスタート
 $org->sessionStart();
@@ -122,11 +119,14 @@ switch($mode) {
 		// テンプレートを設定
 		$tpl = $param['tpl']['form'];
 
+		$token = $org->getTokenFromRequest();
+		$_SESSION['memberData'] = $org->getMemberId($token);
+		if(isset($_SESSION['memberData']['member_id'])) {
+			$data['data']['member_id'] = $_SESSION['memberData']['member_id'];
+		}
+
 		// フォーム用成形
 		$data = $org->makeForm($data);	
-
-		$token = $org->getTokenFromRequest();
-		$_SESSION['entry_token'] = $token;
 
 		if(!$timer_flg) {
 			$data['error']['consecutive'] = '<p class="error consecutive_error">連続しての送信はできません。時間を置いてお試しください。</p>';

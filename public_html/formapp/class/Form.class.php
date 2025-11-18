@@ -126,7 +126,7 @@ class Form {
 			$v = "";
 			$class = "";
 			if(isset($data['error'][$k]) && $data['error'][$k]) { 
-				$v = '<br><span class="error">'.$this->h($data['error'][$k]).'</span>';
+				$v = '<span class="error">'.$this->h($data['error'][$k]).'</span>';
 				$class = "error_bg";
 			}
 			$tpl_data = str_replace("<!-- error_".$k." -->", $v, $tpl_data);
