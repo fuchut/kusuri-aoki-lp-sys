@@ -399,6 +399,8 @@ class Form {
 		$this->error[$key] = "";
 		if(!isset($data[$key]) || !$data[$key]) {
 			$this->error[$key] = '入力してください';
+		} elseif(!$this->isMail($data[$key])) {
+			$this->error[$key] = '入力内容を確認してください';
 		}
 
 		if($this->arrayFilterRecursive($this->error)) {
