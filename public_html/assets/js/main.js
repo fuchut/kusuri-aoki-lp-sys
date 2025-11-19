@@ -37,8 +37,8 @@ function isMobileDevice() {
 $(function () {
   loader();
   telLink();
-  // smoothScroll();
-  containerSmoothScroll();
+  smoothScroll();
+  // containerSmoothScroll();
   phantom(undefined, undefined, true);
   select();
   faqAccordion();
@@ -110,7 +110,6 @@ function telLink() {
 /***********************************************
  * Smooth scroll
  **********************************************/
-/*
 function smoothScroll() {
   $('[href^="#"]').on('click', function () {
     const speed = 500;
@@ -135,13 +134,13 @@ function smoothScroll() {
     }
   }
 }
-*/
 
+/*
 function containerSmoothScroll() {
 
   const $container = $('.lp-layout__center');
 
-  $('[href^="#"]').on('click', function(e){
+  $('a[href^="#"]').on('click', function(e){
     e.preventDefault();
 
     const targetId = $(this).attr('href').replace('#', '');
@@ -163,6 +162,7 @@ function containerSmoothScroll() {
     );
   });
 }
+*/
 
 /***********************************************
  * phantom

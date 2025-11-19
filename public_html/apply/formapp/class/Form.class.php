@@ -132,7 +132,7 @@ class Form {
 			$v = "";
 			$class = "";
 			if(isset($data['error'][$k]) && $data['error'][$k]) { 
-				$v = '<span class="error">'.$this->h($data['error'][$k]).'</span>';
+				$v = '<span class="error red-error">'.$this->h($data['error'][$k]).'</span>';
 				$class = "error_bg";
 			}
 			$tpl_data = str_replace("<!-- error_".$k." -->", $v, $tpl_data);
@@ -534,15 +534,15 @@ class Form {
 		}	
 
 		if(empty($_SESSION['memberData'])) {
-			$this->error['consecutive'] = '<p class="error consecutive_error">入力エラーがあります。</p>';
+			$this->error['consecutive'] = '<p class="error red-error consecutive_error">入力エラーがあります。</p>';
 		} elseif(empty($_SESSION['memberData']['member_id']) || empty($_SESSION['memberData']['email']) || empty($data['member_id']) || empty($data['email'])) {
-			$this->error['consecutive'] = '<p class="error consecutive_error">トークンエラー</p>';
+			$this->error['consecutive'] = '<p class="error red-error consecutive_error">トークンエラー</p>';
 		} elseif(($_SESSION['memberData']['member_id'] != $data['member_id']) || ($_SESSION['memberData']['email'] != $data['email'])) {
-			$this->error['consecutive'] = '<p class="error consecutive_error">トークンエラー</p>';
+			$this->error['consecutive'] = '<p class="error red-error consecutive_error">トークンエラー</p>';
 		}
 
 		if($this->arrayFilterRecursive($this->error)) {
-			$this->error['consecutive'] = '<p class="error consecutive_error">入力エラーがあります。</p>';
+			$this->error['consecutive'] = '<p class="error red-error consecutive_error">入力エラーがあります。</p>';
 		}
 
 		$_SESSION['edit'] = $data;
