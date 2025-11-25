@@ -151,9 +151,7 @@
 									</div>
 									<div class="lp-application-form__content-item-banner">
 										<img src="/assets/img/buneer-main.png" alt="Aocaカードをお持ちでない方は、公式アプリから作成できます！500ポイントで500円券進呈！500円券×3枚＝2000円割引アプリ限定クーポン アプリのダウンロード お使いのデバイスに合わせてApp Storeもしくは Google playよりダウンロードしてください。" width="302" height=340">
-										<img src="/assets/img/bunner-qr.png" alt="Download on the App Store QRコード GET IT ON Google Play QRコード" width="278" height="170" class="js-mobile-only-bunner">
-										<a class="link-app-store" href="https://apps.apple.com/jp/app/%E3%82%AF%E3%82%B9%E3%83%AA%E3%81%AE%E3%82%A2%E3%82%AA%E3%82%AD%E5%85%AC%E5%BC%8F%E3%82%A2%E3%83%97%E3%83%AA/id1464657112?l=en-US" target="_blank"></a>
-										<a class="link-google-play" href="https://play.google.com/store/apps/details?id=jp.co.kusuriaoki.android.public" target="_blank"></a>
+										<a class="link-apps" href="https://kusuri-aoki-info.com/qr-redirect" target="_blank"><img src="/assets/img/bunner-qr.png" alt="Download on the App Store QRコード GET IT ON Google Play QRコード"></a>
 									</div>									
 								</div>
 								<div class="lp-application-form__content-item" data-selected-goods="<!-- present -->">
@@ -422,7 +420,7 @@
 								<div class="lp-faq-section__content-item">
 									<div class="lp-faq-section__content-number">Q1</div>
 									<div class="lp-faq-section__content-question js-faq-question">
-										<p class="lp-faq-section__content-question__text">3000円コースに応募しましたが1度の買い物で6000円購入されても1口となります。</p>
+										<p class="lp-faq-section__content-question__text">3000円コースに応募しましたが1度の買い物で6000円購入されても1口となりますか？</p>
 										<button class="lp-faq-section__content-question__button"></button>
 									</div>
 									<div class="lp-faq-section__content-answer js-faq-answer">

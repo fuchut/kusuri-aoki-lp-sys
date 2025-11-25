@@ -126,7 +126,7 @@ class Form {
 			$v = "";
 			$class = "";
 			if(isset($data['error'][$k]) && $data['error'][$k]) { 
-				$v = '<span class="error">'.$this->h($data['error'][$k]).'</span>';
+				$v = '<span class="error-block">'.$this->h($data['error'][$k]).'</span>';
 				$class = "error_bg";
 			}
 			$tpl_data = str_replace("<!-- error_".$k." -->", $v, $tpl_data);
@@ -381,30 +381,30 @@ class Form {
 		$key = 'member_id';
 		$this->error[$key] = "";
 		if(!isset($data[$key]) || !$data[$key]) {
-			$this->error[$key] = '入力してください';
+			$this->error[$key] = '会員No.を入力してください';
 		} else {
 			$data[$key] = sprintf('%016d', $this->convertAlphaNum(str_replace(" ", "", $data[$key])));
 		 	if(!$this->isInt($data[$key])) {
-				$this->error[$key] = '確認してください';
+				$this->error[$key] = '会員No.を確認してください';
 			}
 		}
 
 		$key = 'present';
 		$this->error[$key] = "";
 		if(!isset($data[$key]) || !$data[$key]) {
-			$this->error[$key] = '選択してください';
+			$this->error[$key] = '応募賞品を選択してください';
 		}		
 
 		$key = 'email';
 		$this->error[$key] = "";
 		if(!isset($data[$key]) || !$data[$key]) {
-			$this->error[$key] = '入力してください';
+			$this->error[$key] = 'メールアドレスを入力してください';
 		} elseif(!$this->isMail($data[$key])) {
-			$this->error[$key] = '入力内容を確認してください';
+			$this->error[$key] = 'メールアドレスを確認してください';
 		}
 
 		if($this->arrayFilterRecursive($this->error)) {
-			$this->error['consecutive'] = '<p class="error consecutive_error">入力エラーがあります。</p>';
+			$this->error['consecutive'] = '<p class="error-block consecutive_error">入力エラーがあります。</p>';
 		}
 
 		$_SESSION['edit'] = $data;
