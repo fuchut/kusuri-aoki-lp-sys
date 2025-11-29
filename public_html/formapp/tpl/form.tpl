@@ -174,7 +174,7 @@
 											<div class="lp-application-form__goods-item-body">
 												<div class="lp-application-form__goods-item-images flex-end">
 													<div class="lp-application-form__goods-item-image">
-														<img src="/assets/img/form-couse01.png" alt="ノベルティカード 3万円分" width="206" height="90">
+														<img src="/assets/img/form-couse01.png" alt="ノベルティカード 3万円分" width="207" height="91">
 													</div>
 												</div>
 											</div>
@@ -195,7 +195,7 @@
 												<div class="lp-application-form__goods-item-body">
 													<div class="lp-application-form__goods-item-images">
 														<div class="lp-application-form__goods-item-image">
-															<img src="/assets/img/form-couse02.png" alt="プレート 4枚セット" width="125" height="80">
+															<img src="/assets/img/form-couse02.png" alt="プレート 4枚セット" width="255" height="166">
 														</div>
 													</div>
 												</div>
@@ -209,7 +209,7 @@
 												<div class="lp-application-form__goods-item-body">
 													<div class="lp-application-form__goods-item-images">
 														<div class="lp-application-form__goods-item-image">
-															<img src="/assets/img/form-couse03.png" alt="ブランケット in クッション" width="109" height="80">
+															<img src="/assets/img/form-couse03.png" alt="ブランケット in クッション" width="255" height="166">
 														</div>
 													</div>
 												</div>
@@ -223,7 +223,7 @@
 												<div class="lp-application-form__goods-item-body">
 													<div class="lp-application-form__goods-item-images">
 														<div class="lp-application-form__goods-item-image">
-															<img src="/assets/img/form-couse04.png" alt="マグカップ（フタ付）２個セット" width="122" height="65">
+															<img src="/assets/img/form-couse04.png" alt="マグカップ（フタ付）２個セット" width="255" height="166">
 														</div>
 													</div>
 												</div>
@@ -236,7 +236,7 @@
 												<div class="lp-application-form__goods-item-body">
 													<div class="lp-application-form__goods-item-images">
 														<div class="lp-application-form__goods-item-image">
-															<img src="/assets/img/form-couse05.png" alt="水筒（350ml）" width="88" height="76">
+															<img src="/assets/img/form-couse05.png" alt="水筒（350ml）" width="255" height="166">
 														</div>
 													</div>
 													<div class="lp-application-form__goods-item-options js-bottle-options">
@@ -260,7 +260,7 @@
 												<div class="lp-application-form__goods-item-body">
 													<div class="lp-application-form__goods-item-images">
 														<div class="lp-application-form__goods-item-image">
-															<img src="/assets/img/form-couse06.png" alt="バスタオル" width="120" height="80">
+															<img src="/assets/img/form-couse06.png" alt="バスタオル" width="255" height="166">
 														</div>
 													</div>
 												</div>
@@ -274,7 +274,7 @@
 												<div class="lp-application-form__goods-item-body">
 													<div class="lp-application-form__goods-item-images">
 														<div class="lp-application-form__goods-item-image">
-															<img src="/assets/img/form-couse07.png" alt="ランチBOXセット" width="112" height="78">
+															<img src="/assets/img/form-couse07.png" alt="ランチBOXセット" width="255" height="166">
 														</div>
 													</div>
 												</div>
@@ -359,7 +359,7 @@
 											ご入力いただいた住所に賞品をお届けいたします。<br>
 											お客様へのお届け先が不明な場合、当選を取り消す場合がございます。<br>
 											賞品の発送は日本国内に限ります。<br>
-											当選者様への賞品発送は、2026年3月下旬から4月初旬を予定しております。<br>
+											当選者様への賞品発送は、2026年3月下旬から4月上旬を予定しております。<br>
 											【当選者数について】<br>
 											（5,000円コース）合計300名様<br>
 											（3,000円コース）合計7,000名様<br>
@@ -420,7 +420,7 @@
 								<div class="lp-faq-section__content-item">
 									<div class="lp-faq-section__content-number">Q1</div>
 									<div class="lp-faq-section__content-question js-faq-question">
-										<p class="lp-faq-section__content-question__text">3000円コースに応募しましたが1度の買い物で6000円購入されても1口となりますか？</p>
+										<p class="lp-faq-section__content-question__text">3,000円コースに応募しましたが1度の買い物で6,000円購入しても1口となりますか？</p>
 										<button class="lp-faq-section__content-question__button"></button>
 									</div>
 									<div class="lp-faq-section__content-answer js-faq-answer">

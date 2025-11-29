@@ -161,7 +161,8 @@ class Form {
 		$key = 'member_id';
 		if(isset($data['data'][$key]) && $data['data'][$key]) {
 			$value = $this->convertAlphaNum(str_replace(" ", "", $data['data'][$key]));
-			$data['data'][$key] = sprintf('%016d', $value);
+			// $data['data'][$key] = sprintf('%016d', $value);
+			$data['data'][$key] = $value;
 		}
 
 		return $data;
@@ -317,7 +318,7 @@ class Form {
 
 		$key = 'member_id';
 		if(isset($data['data'][$key]) && $data['data'][$key]) {
-			$value = $this->convertAlphaNum($data['data'][$key]);
+			$value = $this->convertAlphaNum(str_replace(" ", "", $data['data'][$key]));
 			$value = sprintf('%016d', $value);
 			$data['data'][$key] = trim(chunk_split($value, 4, ' '));
 		}
@@ -495,11 +496,12 @@ class Form {
 		$key = 'member_id';
 		$this->error[$key] = "";
 		if(!isset($data[$key]) || !$data[$key]) {
-			$this->error[$key] = '入力してください';
+			$this->error[$key] = '会員No.を入力してください';
 		} else {
-			$data[$key] = sprintf('%016d', $this->convertAlphaNum(str_replace(" ", "", $data[$key])));
-		 	if(!$this->isInt($data[$key])) {
-				$this->error[$key] = '確認してください';
+			$data[$key] = $this->convertAlphaNum($data[$key]);
+			$noHyphen = str_replace(" ", "", $data[$key]);
+		 	if(!$this->isInt($noHyphen) || !$this->strLength($noHyphen, 16, 16)) {
+				$this->error[$key] = '会員No.を確認してください';
 			}
 		}
 
