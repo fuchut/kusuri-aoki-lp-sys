@@ -239,14 +239,17 @@
 															<img src="/assets/img/form-couse05.png" alt="水筒（350ml）" width="255" height="166">
 														</div>
 													</div>
-													<div class="lp-application-form__goods-item-options js-bottle-options">
-														<div class="lp-application-form__goods-item-option">
-															<input type="radio" name="present" value="5" data-goods-id="5" data-color="white" id="goods-bottle-white" class="js-bottle-radio">
-															<label for="goods-bottle-white">白</label>
-														</div>
-														<div class="lp-application-form__goods-item-option">
-															<input type="radio" name="present" value="6" data-goods-id="6" data-color="black" id="goods-bottle-black" class="js-bottle-radio">
-															<label for="goods-bottle-black">黒</label>
+													<div class="js-bottle-options">
+														<p class="bottle-notice">色を選択してください</p>
+														<div class="lp-application-form__goods-item-options ">
+															<div class="lp-application-form__goods-item-option">
+																<input type="radio" name="present" value="5" data-goods-id="5" data-color="white" id="goods-bottle-white" class="js-bottle-radio">
+																<label for="goods-bottle-white">白</label>
+															</div>
+															<div class="lp-application-form__goods-item-option">
+																<input type="radio" name="present" value="6" data-goods-id="6" data-color="black" id="goods-bottle-black" class="js-bottle-radio">
+																<label for="goods-bottle-black">黒</label>
+															</div>
 														</div>
 													</div>
 												</div>
