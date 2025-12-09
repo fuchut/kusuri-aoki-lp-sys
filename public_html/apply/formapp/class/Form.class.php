@@ -500,6 +500,7 @@ class Form {
 		} else {
 			$data[$key] = $this->convertAlphaNum($data[$key]);
 			$noHyphen = str_replace(" ", "", $data[$key]);
+			$data[$key] = $noHyphen;
 		 	if(!$this->isInt($noHyphen) || !$this->strLength($noHyphen, 16, 16)) {
 				$this->error[$key] = '会員No.を確認してください';
 			}
