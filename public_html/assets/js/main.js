@@ -465,3 +465,13 @@ function entryFormInput() {
     restrictToNumbersAndHyphen($phoneInput);
   }
 }
+
+
+$(function() {
+  if($('.apologize-contents')[0]) {
+    $('.apologize-contents').on('click', function(e) {
+      $('.apologize-contents').toggleClass('active');
+      $('.apologize-body').slideToggle();
+    });
+  }
+})

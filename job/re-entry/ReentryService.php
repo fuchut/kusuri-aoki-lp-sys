@@ -155,6 +155,28 @@ class ReentryService
     }
 
     /* ============================================================
+        再登録者一覧
+    ============================================================ */
+    public function getReentryList(): array
+    {
+        $sql = "
+            SELECT
+                bad.email AS email
+            FROM entry AS bad
+            JOIN entry AS good
+            ON bad.email = good.email
+            WHERE bad.updated_at < '2025-12-06'
+            AND bad.member_id NOT REGEXP '^[0-9]{16}$'
+            AND good.updated_at >= '2025-12-06'
+            AND good.member_id REGEXP '^[0-9]{16}$' 
+            GROUP BY bad.email
+            ORDER BY MIN(good.updated_at) ASC
+        ";
+        $st = $this->pdo->query($sql);
+        return $st->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /* ============================================================
         未再登録者一覧
     ============================================================ */
     public function getNoReentryList(): array

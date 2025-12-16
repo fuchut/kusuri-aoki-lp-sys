@@ -40,6 +40,30 @@
 						</div>
 					</section>
 
+					<section class="lp-section lp-section-apologize">
+						<div class="apologize-contents">
+							<div class="apologize-title">
+								<strong>再応募のお願いのメールが届いたお客様へ</strong>
+●対象のお客様<br>
+12月1日〜12月4日19:00までに応募を完了された方の内、再応募のお願いのメールが届いたお客様
+							</div>
+
+							<div class="apologize-body">
+<p>システムの不具合により一部お客様の応募情報が正常に受け付けられていないことが判明いたしました。対象のお客様には<strong>12月8日（月）に『【再応募のお願い】40周年大感謝キャンペーン』の件名にて案内メール</strong>をお送りしております。</p>
+<p>誠にお手数をおかけいたしますが、メール内容をご確認の上、再度ご応募いただきますようお願い申し上げます。</p>
+<p class="notice">
+	※現在、システムの不具合は解消しております。安心してご応募ください。<br>
+※12月12日（金）に再応募をまだいただけていないお客様へ下記件名にて再度ご案内メールをお送りしております。<br>
+「【再送】再応募のお願い～クスリのアオキ40周年大感謝キャンペーン～」
+</p>
+							</div>
+
+							<div class="apologize-button">
+								こちらをご確認ください
+							</div>
+						</div>
+					</section>
+
 					<!-- キャンペーン情報セクション -->
 					<section class="lp-section lp-period-section">
 						<img src="/assets/img/period.png" alt="お買い物対象期間 2025年12月1日（月）～2026年2月2日(月) 応募締切2026年2月2日(月) 23:59まで">
@@ -139,7 +163,7 @@
 									</div>
 									<!-- error_member_id -->
 									<div class="lp-application-form__content-item-input">
-										<input type="text" name="member_id" value="<!-- member_id -->" placeholder="0000 0000 0000 0000">
+										<input type="text" name="member_id" value="<!-- member_id -->" placeholder="0000 0000 0000 0000" inputmode="numeric">
 									</div>
 									<div class="lp-application-form__content-item-img">
 										<img src="/assets/img/number-check.png" alt="カード裏面の16桁の番号が書かれていますのでそれを入力してください。" width="326" height="102">

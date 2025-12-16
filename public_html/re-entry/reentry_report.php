@@ -60,6 +60,30 @@ if (!empty($_GET['action'])) {
         $actionResult = runReentryCron($service, true);
     }
 
+    // ★ cron_save_timebands.php（morning）
+    if ($_GET['action'] === 'timeband_morning') {
+
+        $script = __DIR__ . '/../../job/re-entry/cron_save_timebands.php';
+        if (file_exists($script)) {
+            $cmd = "/usr/bin/php " . escapeshellarg($script) . " morning 2>&1";
+            $actionResult = shell_exec($cmd);
+        } else {
+            $actionResult = "ERROR: cron_save_timebands.php が見つかりません。";
+        }
+    }
+
+    // ★ cron_save_timebands.php（evening）
+    if ($_GET['action'] === 'timeband_evening') {
+
+        $script = __DIR__ . '/../../job/re-entry/cron_save_timebands.php';
+        if (file_exists($script)) {
+            $cmd = "/usr/bin/php " . escapeshellarg($script) . " evening 2>&1";
+            $actionResult = shell_exec($cmd);
+        } else {
+            $actionResult = "ERROR: cron_save_timebands.php が見つかりません。";
+        }
+    }
+
     // ④ 初回 JSON 生成
     if ($_GET['action'] === 'init_json') {
 
@@ -180,10 +204,13 @@ pre {white-space:pre-wrap;}
 
 <div class="card">
     <h3>操作メニュー</h3>
-    <a class="btn" href="?action=latest_total">🔄 最新累計を取得</a>
-    <a class="btn" href="?action=json_test">📄 JSON生成テスト</a>
-    <a class="btn" href="?action=mail_test">📧 テストメール送信</a>
-    <a class="btn" href="?action=init_json">📄 全 JSON を初回生成する</a>
+    <a class="btn" href="?action=latest_total">🔄 最新の再登録累計を取得</a>
+    <a class="btn" href="?action=json_test" style="display:none;">📄 JSON生成テスト</a>
+    <a class="btn" href="?action=mail_test" style="display:none;">📧 テストメール送信</a>
+    <!-- ★ cron_save_timebands.php 実行ボタン -->
+    <a class="btn" href="?action=timeband_morning" style="display:none;">🌅 09:30 集計を実行（morning）</a>
+    <a class="btn" href="?action=timeband_evening" style="display:none;">🌆 18:00 集計を実行（evening）</a>
+    <?php /* <a class="btn" href="?action=init_json">📄 全 JSON を初回生成する</a> */ ?>
 </div>
 
 
@@ -230,6 +257,10 @@ pre {white-space:pre-wrap;}
     </table>
 </div>
 
+<div class="card">
+    <h3>再登録者一覧（CSV ダウンロード）</h3>
+    <a class="btn" href="download_reentry.php">CSV をダウンロード</a>
+</div>
 
 <div class="card">
     <h3>未再登録者一覧（CSV ダウンロード）</h3>

@@ -24,7 +24,7 @@
 										<img src="/assets/img/form-aoca-title-b.png" alt="Aoca番号 必須項目" width="140" height="22">
 									</div>
 									<div class="lp-entry-form__content-item-input">
-										<input type="text" name="member_id" value="<!-- member_id -->" placeholder="0000 0000 0000 0000" required>
+										<input type="text" name="member_id" value="<!-- member_id -->" placeholder="0000 0000 0000 0000" inputmode="numeric" required>
 										<!-- error_member_id -->
 									</div>
 									<div class="lp-entry-form__content-item-img">

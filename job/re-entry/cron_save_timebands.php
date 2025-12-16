@@ -27,53 +27,84 @@ if (!is_dir($cacheDir)) {
     mkdir($cacheDir, 0777, true);
 }
 
-$summaryFile = $cacheDir . "/daily_summary_{$today}.json";
-
-/* 既存データ読み込み（あれば） */
-$data = [
-    "date" => $today,
-    "bad_night" => null,
-    "bad_daytime" => null,
-    "reentry_total_0930" => null,
-    "reentry_total_1800" => null
-];
-
-if (file_exists($summaryFile)) {
-    $json = json_decode(file_get_contents($summaryFile), true);
-    if (is_array($json)) {
-        $data = array_merge($data, $json);
-    }
-}
-
 /*=================================================================
-    morning（09:30）：前日18:00〜当日9:30 の夜間集計
+    morning（09:30）：
+    - 前日18:00〜当日9:30 → night
+    - 09:30 時点の累計
 =================================================================*/
 if ($mode === 'morning') {
 
-    $data["bad_night"] = $service->getBadNightForDate($today);
-    $data["reentry_total_0930"] = $service->getReentryTotalUntil("09:30");
+    /* 夜間不具合数 → bad_night.json */
+    $badNight = $service->getBadNightForDate($today);
+
+    $fileNight = $cacheDir . "/bad_night.json";
+    $jsonNight = [
+        "date"  => $today,
+        "count" => $badNight
+    ];
+    file_put_contents(
+        $fileNight,
+        json_encode($jsonNight, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT),
+        LOCK_EX
+    );
+
+    /* 9:30 再登録累計 → reentry_total_0930.json */
+    $count930 = $service->getReentryTotalUntil("09:30");
+
+    $file930 = $cacheDir . "/reentry_total_0930.json";
+    $json930 = [
+        "date"  => $today,
+        "count" => $count930
+    ];
+    file_put_contents(
+        $file930,
+        json_encode($json930, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT),
+        LOCK_EX
+    );
 
     echo "Executed morning mode\n";
+    echo "Saved: bad_night.json\n";
+    echo "Saved: reentry_total_0930.json\n";
 }
 
+
 /*=================================================================
-    evening（18:00）：当日9:30〜18:00 の昼間集計
+    evening（18:00）：
+    - 当日9:30〜18:00 → daytime
+    - 18:00 時点の累計
 =================================================================*/
 if ($mode === 'evening') {
 
-    $data["bad_daytime"] = $service->getBadDaytimeForDate($today);
-    $data["reentry_total_1800"] = $service->getReentryTotalUntil("18:00");
+    /* 昼間不具合数 → bad_daytime.json */
+    $badDaytime = $service->getBadDaytimeForDate($today);
+
+    $fileDay = $cacheDir . "/bad_daytime.json";
+    $jsonDay = [
+        "date"  => $today,
+        "count" => $badDaytime
+    ];
+    file_put_contents(
+        $fileDay,
+        json_encode($jsonDay, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT),
+        LOCK_EX
+    );
+
+    /* 18:00 再登録累計 → reentry_total_1800.json */
+    $count1800 = $service->getReentryTotalUntil("18:00");
+
+    $file1800 = $cacheDir . "/reentry_total_1800.json";
+    $json1800 = [
+        "date"  => $today,
+        "count" => $count1800
+    ];
+    file_put_contents(
+        $file1800,
+        json_encode($json1800, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT),
+        LOCK_EX
+    );
 
     echo "Executed evening mode\n";
+    echo "Saved: bad_daytime.json\n";
+    echo "Saved: reentry_total_1800.json\n";
 }
 
-/*=================================================================
-    JSON 保存
-=================================================================*/
-file_put_contents(
-    $summaryFile,
-    json_encode($data, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT),
-    LOCK_EX
-);
-
-echo "Saved: {$summaryFile}\n";
