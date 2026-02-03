@@ -56,22 +56,11 @@
 								
 								<div class="lp-entry-form__content-item">
 									<div class="lp-entry-form__content-item-label">
-										<img src="/assets/img/form-mail-b.png" alt="メールアドレス 必須項目" width="166" height="24">
-									</div>
-									<div class="lp-entry-form__content-item-input">
-										<input type="email" name="email" value="<!-- email -->" placeholder="例)info@example.com" required>
-									</div>
-									<div class="lp-entry-form__content-item-attention">
-										<p class="color-red">ドメイン拒否を設定されている場合、確認メールが届きませんので、あらかじめ「cp2025-kusuri-aoki.com」のドメインを受信できるように設定をお願いします。</p>
-									</div>
-								</div>
-								
-								<div class="lp-entry-form__content-item">
-									<div class="lp-entry-form__content-item-label">
 										<img src="/assets/img/form-tel-b.png" alt="電話番号 必須項目" width="125" height="22">
 									</div>
 									<div class="lp-entry-form__content-item-input">
-										<input type="tel" name="tel" value="<!-- tel -->" placeholder="例)0120-397-026" required>
+										<input type="tel" name="tel" value="<!-- tel -->" placeholder="例)0120-397-026" inputmode="tel" required>
+										<!-- error_tel -->
 									</div>
 								</div>
 								
@@ -79,11 +68,15 @@
 									<div class="lp-entry-form__content-item-label">
 										<img src="/assets/img/form-address-b.png" alt="住所 必須項目" width="86" height="22">
 									</div>
-									<div class="lp-entry-form__content-item-input">
-										<input type="text" name="address" value="<!-- address -->" placeholder="例)石川県白山市横江町5180番地" required>
+									<script src="https://yubinbango.github.io/yubinbango/yubinbango.js" charset="UTF-8"></script>
+									<div class="lp-entry-form__content-item-input h-adr">
+										<span class="p-country-name" style="display:none;">Japan</span>
+										〒 <input type="text" name="zip" value="<!-- zip -->" placeholder="例)9200001" class="p-postal-code" size="8" maxlength="8" inputmode="numeric" required>
+										<input type="text" name="address" value="<!-- address -->" placeholder="例)石川県白山市横江町5180番地" class="p-region p-locality p-street-address p-extended-address" required>
+										<!-- error_zip -->
+										<!-- error_address -->
 									</div>
-								</div>
-							
+								</div>					
 								
 								<div class="lp-entry-form__privacy">
 									<p class="lp-entry-form__privacy-text">
@@ -213,3 +206,5 @@
 				</div>
 			</footer>
 		</div>
+
+		

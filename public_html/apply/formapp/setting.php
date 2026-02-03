@@ -26,7 +26,9 @@ $param['forms'] = array(
         'first_name',
         'email',
         'tel',        
+        'zip',
         'address',
+        'token',
 );
 
 // type, autocomplete メモ
@@ -66,6 +68,47 @@ $param['xxxxxxxxxxxxxxxxxx_type'] = 'checkbox';
 $param['xxxxxxxxxxxxxxxxxx_max'] = -1;
 
 *****************************************/
+
+// =====================================
+// Group設定
+// =====================================
+define('APP_GROUP', 'G2');
+
+// =====================================
+// DB設定
+// =====================================
+define('DB_NAME', 'mydatabase');
+define('DB_USER', 'myuser');
+define('DB_PASSWORD', 'mypassword');
+define('DB_HOST', 'db');
+define('DB_PORT', '3306');
+
+// =====================================
+// サーバー連携設定
+// =====================================
+// ===== B連携先 =====
+define('B_RECEIVE_URL', 'https://aoki-cp2025.wk-demo.com/recieve/recieve.php'); // Bの受信API
+define('SHARED_SECRET', 'db1c3a6411eaff31461b22a5b26ae1cabd3974048c54a4b6e66115ae6bfad838');         // A/B同一にする
+
+// B公開鍵（base64ファイル）
+// Aサーバー上の配置パス（public_html外推奨でもOK。読める場所ならOK）
+define('B_PUBLICKEY_B64_PATH', dirname(__FILE__).'/keys/box_public.b64');
+
+// ベーシック認証
+define('B_BASIC_USER', 'works');
+define('B_BASIC_PASS', 'pwworks');
+
+// ===== Outbox動作 =====
+define('OUTBOX_LOCK_NAME', 'outbox_cipher_send_lock');
+define('OUTBOX_SEND_LIMIT_DEFAULT', 100);
+define('OUTBOX_HTTP_TIMEOUT', 10); // 秒
+
+// 送信リトライ最大回数（超えたらdead）
+define('OUTBOX_MAX_TRY', 5);
+
+// ログ
+define('OUTBOX_LOG_DIR', __DIR__ . '/logs');
+define('OUTBOX_LOG_FILE', OUTBOX_LOG_DIR . '/outbox_sender.log');
 
 // =====================================
 // 応募URL

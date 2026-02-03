@@ -12,6 +12,7 @@ services:
     volumes:
       - ./public_html:/var/www/public_html
       - ./job:/var/www/job
+      - ./bin:/var/www/bin
     depends_on:
       - db
     restart: unless-stopped

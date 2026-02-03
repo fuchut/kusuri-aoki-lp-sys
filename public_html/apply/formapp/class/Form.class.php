@@ -1,7 +1,7 @@
 <?php
 
-require $_SERVER["DOCUMENT_ROOT"].'/../../bin/vendor/autoload.php';
 // require $_SERVER["DOCUMENT_ROOT"].'/../../bin/vendor/autoload.php';
+require $_SERVER["DOCUMENT_ROOT"].'/../bin/vendor/autoload.php';
 
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
@@ -249,6 +249,7 @@ class Form {
             $memberId    = preg_replace('/\D/', '', $memberIdRaw);
 
             return [
+								'token'			=> $token,
                 'member_id' => $memberId,
                 'present'   => $rowValues[1] ?? '',
                 'email'     => $rowValues[2] ?? '',
@@ -297,6 +298,7 @@ class Form {
 
             fclose($fp);
             return array(
+							'token' => $token,
 							'member_id' => $memberId, 
 							'present' => $row[1],
 							'email' => $row[2],
@@ -340,6 +342,9 @@ class Form {
 			$data['data'][$key] = trim(chunk_split($value, 4, ' '));
 		}
 
+		$key = 'present';
+		$data['data'][$key] = empty($_SESSION['memberData'][$key]) ? "" : $_SESSION['memberData'][$key];
+
 		return $data;
 	}
 
@@ -369,8 +374,8 @@ class Form {
       $msg = str_replace("<!-- ".$k." -->", $this->d_h($this->mb_wordwrap($v, 250)), $msg);
 		}
 
-		$present = empty($_SESSION['memberData']['present']) ? "" : $_SESSION['memberData']['present'];
-		$msg = str_replace("<!-- present -->", $this->d_h($this->mb_wordwrap($present, 250)), $msg);
+		//$present = empty($_SESSION['memberData']['present']) ? "" : $_SESSION['memberData']['present'];
+		//$msg = str_replace("<!-- present -->", $this->d_h($this->mb_wordwrap($present, 250)), $msg);
 
 		$msg = mb_convert_encoding($msg, $charset, "AUTO");
 
@@ -400,7 +405,7 @@ class Form {
 					$msg = str_replace("<!-- ".$k." -->", $this->d_h($this->mb_wordwrap($v, 250)), $msg);
 				}
 
-				$msg = str_replace("<!-- present -->", $this->d_h($this->mb_wordwrap($present, 250)), $msg);
+				// $msg = str_replace("<!-- present -->", $this->d_h($this->mb_wordwrap($present, 250)), $msg);
 				
 				$msg = mb_convert_encoding($msg, $charset, "AUTO");
 
@@ -493,6 +498,12 @@ class Form {
 		$this->error = $tmp['error'];
 		unset($this->error['consecutive']);
 
+		$key = 'token';
+		$this->error[$key] = "";
+		if(!isset($data[$key]) || !$data[$key]) {
+			$this->error[$key] = 'トークンをが不正です';
+		}
+
 		$key = 'member_id';
 		$this->error[$key] = "";
 		if(!isset($data[$key]) || !$data[$key]) {
@@ -516,6 +527,7 @@ class Form {
 		if(!isset($data[$key]) || !$data[$key]) {
 			$this->error[$key] = '入力してください';
 		}		
+
 		$key = 'email';
 		$this->error[$key] = "";
 		if(!isset($data[$key]) || !$data[$key]) {
@@ -523,6 +535,7 @@ class Form {
 		} elseif(!$this->isMail($data[$key])) {
 			$this->error[$key] = '入力内容を確認してください';
 		}
+
 		$key = 'tel';
 		$this->error[$key] = "";
 		if(!isset($data[$key]) || !$data[$key]) {
@@ -530,6 +543,13 @@ class Form {
 		} elseif(!$this->isTelNoH($data[$key])) {
 			$this->error[$key] = '入力内容を確認してください';
 		}
+
+		$key = 'zip';
+		$this->error[$key] = "";
+		if(!isset($data[$key]) || !$data[$key]) {
+			$this->error[$key] = '入力してください';
+		}	
+
 		$key = 'address';
 		$this->error[$key] = "";
 		if(!isset($data[$key]) || !$data[$key]) {

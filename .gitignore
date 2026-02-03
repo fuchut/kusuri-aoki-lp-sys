@@ -16,3 +16,6 @@ sitemap.xml
 db/
 
 *.csv
+
+/bin/vendor/
+/keys/

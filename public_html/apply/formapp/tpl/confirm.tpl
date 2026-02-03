@@ -25,12 +25,12 @@
 										<div class="lp-confirm-section__table-value"><!-- member_id --></div>
 									</div>
 									<div class="lp-confirm-section__table-row">
-										<div class="lp-confirm-section__table-label">お名前</div>
-										<div class="lp-confirm-section__table-value"><!-- last_name --><!-- first_name --></div>
-									</div>
-									<div class="lp-confirm-section__table-row">
 										<div class="lp-confirm-section__table-label">メールアドレス</div>
 										<div class="lp-confirm-section__table-value"><!-- email --></div>
+									</div>
+									<div class="lp-confirm-section__table-row">
+										<div class="lp-confirm-section__table-label">お名前</div>
+										<div class="lp-confirm-section__table-value"><!-- last_name --><!-- first_name --></div>
 									</div>
 									<div class="lp-confirm-section__table-row">
 										<div class="lp-confirm-section__table-label">電話番号</div>
@@ -38,7 +38,7 @@
 									</div>
 									<div class="lp-confirm-section__table-row">
 										<div class="lp-confirm-section__table-label">住所</div>
-										<div class="lp-confirm-section__table-value"><!-- address --></div>
+										<div class="lp-confirm-section__table-value">〒<!-- zip --><br><!-- address --></div>
 									</div>
 								</div>
 								
