@@ -119,6 +119,9 @@ switch($mode) {
 				break;
 			}
 
+			// member_idのスペースをお落とす
+			$trim_member_id = str_replace(" ", "", $maildata['data']['member_id']);
+
 			// ===== 1.5) A Outboxへ暗号文保存（復号不可）=====
 			try {
 				$payload = [
@@ -126,7 +129,7 @@ switch($mode) {
 					'group'      => $group,
 
 					// 必須（B側がチェックしている）
-					'member_id'  => (string)($maildata['data']['member_id'] ?? ''),  // ←ここ重要
+					'member_id'  => (string)($trim_member_id ?? ''),  // ←ここ重要
 					'email'      => (string)($maildata['data']['email'] ?? ''),
 
 					// 氏名（分割済み）

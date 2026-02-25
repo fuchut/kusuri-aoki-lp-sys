@@ -17,28 +17,38 @@ final class OutboxSender
     {
         $this->pdo->exec("
             CREATE TABLE IF NOT EXISTS outbox_cipher (
-              id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-              idempotency_key CHAR(64) NOT NULL,
-              ciphertext_b64 MEDIUMTEXT NOT NULL,
-              status ENUM('pending','sent','fail') NOT NULL DEFAULT 'pending',
-              try_count INT UNSIGNED NOT NULL DEFAULT 0,
-              next_try_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-              sent_at DATETIME NULL,
-              last_error VARCHAR(255) NULL,
-              created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-              UNIQUE KEY uq_idem (idempotency_key),
-              KEY idx_status_next (status, next_try_at)
+            id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+
+            created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            sent_at    DATETIME NULL,
+
+            status ENUM('pending','sent','fail') NOT NULL DEFAULT 'pending',
+            try_count INT UNSIGNED NOT NULL DEFAULT 0,
+            revision_count INT UNSIGNED NOT NULL DEFAULT 0,
+
+            next_try_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            last_error  VARCHAR(255) NULL,
+
+            token_hash CHAR(64) NOT NULL,
+            token      VARCHAR(255) NULL,
+
+            idempotency_key CHAR(64) NOT NULL,
+            ciphertext_b64  MEDIUMTEXT NOT NULL,
+
+            UNIQUE KEY uq_tokenhash (token_hash),
+            KEY idx_status_next (status, next_try_at),
+            KEY idx_token_status (token(32), status),
+            KEY idx_idem (idempotency_key)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
         ");
     }
 
+
     /** payloadを暗号化してOutboxに積む（復号不可） */
-/** payloadを暗号化してOutboxに積む（復号不可） */
     public function enqueue(array $payload): void
     {
         $cipherB64 = $this->sealPayload($payload);
 
-        // idempotency：token + group + member_id + email（仕様に合わせて）
         $token    = (string)($payload['token'] ?? '');
         $group    = (string)($payload['group'] ?? '');
         $memberId = (string)($payload['member_id'] ?? '');
@@ -46,63 +56,110 @@ final class OutboxSender
 
         // ガード（運用事故防止）
         if ($token === '' || $group === '' || $memberId === '' || $email === '') {
-            throw new RuntimeException('enqueue: missing required fields for idempotency');
+            throw new RuntimeException('enqueue: missing required fields');
         }
 
-        $idem      = hash('sha256', $token . "\n" . $group . "\n" . $memberId . "\n" . $email);
         $tokenHash = hash('sha256', $token);
 
-        $this->pdo->prepare("
+        // 毎回ユニーク（B側 audit / リプレイ追跡用途）
+        $idem = bin2hex(random_bytes(32));
+
+        $sql = "
             INSERT INTO outbox_cipher (
-                idempotency_key,
-                token_hash,
-                token,
-                ciphertext_b64,
+                created_at,
+                sent_at,
                 status,
                 try_count,
+                revision_count,
+                next_try_at,
                 last_error,
-                created_at
-            )
-            VALUES (
-                :idem,
-                :th,
-                :token,
-                :c,
+                token_hash,
+                token,
+                idempotency_key,
+                ciphertext_b64
+            ) VALUES (
+                NOW(),
+                NULL,
                 'pending',
                 0,
+                0,
+                NOW(),
                 NULL,
-                NOW()
+                :th,
+                :token,
+                :idem,
+                :c
             )
-            ON DUPLICATE KEY UPDATE id = id
-        ")->execute([
-            ':idem'  => $idem,
+            ON DUPLICATE KEY UPDATE
+                -- 最新内容で上書き
+                token           = VALUES(token),
+                idempotency_key = VALUES(idempotency_key),
+                ciphertext_b64  = VALUES(ciphertext_b64),
+
+                -- 送信再開（毎回Bに送る）
+                status      = 'pending',
+                next_try_at = NOW(),
+                sent_at     = NULL,
+                last_error  = NULL,
+
+                -- 内容更新回数（try_countとは別）
+                revision_count = revision_count + 1
+        ";
+
+        $this->pdo->prepare($sql)->execute([
             ':th'    => $tokenHash,
             ':token' => $token,
+            ':idem'  => $idem,
             ':c'     => $cipherB64,
         ]);
     }
+
+
 
     /** pendingをBへ送る（フォーム送信後 or cronで実行） */
     public function trySend(int $limit = 50): void
     {
         $lock = defined('OUTBOX_LOCK_NAME') ? (string)OUTBOX_LOCK_NAME : 'outbox_send_lock';
-        $got = $this->pdo->query("SELECT GET_LOCK(".$this->pdo->quote($lock).", 1) AS got")->fetch();
+        $got  = $this->pdo->query("SELECT GET_LOCK(".$this->pdo->quote($lock).", 1) AS got")->fetch();
         if (empty($got) || (int)$got['got'] !== 1) return;
 
         try {
-            $rows = $this->pdo->prepare("
+            // ① 送信対象を拾う
+            $st = $this->pdo->prepare("
                 SELECT id, idempotency_key, ciphertext_b64, try_count
                 FROM outbox_cipher
                 WHERE status='pending' AND next_try_at <= NOW()
                 ORDER BY id ASC
                 LIMIT :lim
             ");
-            $rows->bindValue(':lim', $limit, PDO::PARAM_INT);
-            $rows->execute();
-            $list = $rows->fetchAll();
+            $st->bindValue(':lim', $limit, PDO::PARAM_INT);
+            $st->execute();
+            $list = $st->fetchAll();
 
             foreach ($list as $r) {
-                $this->sendOne((int)$r['id'], (string)$r['idempotency_key'], (string)$r['ciphertext_b64'], (int)$r['try_count']);
+                $id = (int)$r['id'];
+
+                // ② ここで“掴む” (他プロセスが拾い直さないように next_try_at を未来へ)
+                //    例：2分ロック（送信が詰まっても次のプロセスがすぐ拾わない）
+                $grab = $this->pdo->prepare("
+                    UPDATE outbox_cipher
+                    SET next_try_at = DATE_ADD(NOW(), INTERVAL 2 MINUTE)
+                    WHERE id = :id AND status='pending' AND next_try_at <= NOW()
+                ");
+                $grab->execute([':id' => $id]);
+
+                if ($grab->rowCount() !== 1) {
+                    // すでに他が掴んだ or 状態が変わった
+                    continue;
+                }
+
+                // ③ 送信
+                $this->sendOne(
+                    $id,
+                    (string)$r['idempotency_key'],
+                    (string)$r['ciphertext_b64'],
+                    (int)$r['try_count']
+                );
             }
         } finally {
             $this->pdo->query("DO RELEASE_LOCK(".$this->pdo->quote($lock).")");

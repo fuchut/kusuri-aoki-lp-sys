@@ -338,6 +338,7 @@ class Form {
 		$key = 'member_id';
 		if(isset($data['data'][$key]) && $data['data'][$key]) {
 			$value = $this->convertAlphaNum($data['data'][$key]);
+			$value = str_replace(" ", "", $value);
 			$value = sprintf('%016d', $value);
 			$data['data'][$key] = trim(chunk_split($value, 4, ' '));
 		}
